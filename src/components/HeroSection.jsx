@@ -168,7 +168,6 @@ function ResponsiveElements() {
   // تشخیص موبایل بر اساس عرض دید دوربین در Three.js
   const isMobile = viewport.width < 5.5;
 
-  // در موبایل المان‌ها به داخل کادر (x کمتر) و بالا و پایین متن کشیده می‌شوند
   const platePos = isMobile
     ? [viewport.width * 0.36, 2.6, -0.5]
     : [3.8, 1.6, -0.5];
@@ -182,7 +181,6 @@ function ResponsiveElements() {
     ? [-viewport.width * 0.35, -2.7, -0.4]
     : [-3.4, -1.7, -0.4];
 
-  // اسکیل متناسب تا در موبایل صفحه را نپوشانند
   const elemScale = isMobile ? 0.78 : 1.1;
 
   return (
@@ -283,16 +281,16 @@ export default function HeroSection() {
         </div>
 
         <h1 className="text-3xl font-black leading-[1.25] tracking-tight text-white sm:text-5xl lg:text-6xl drop-shadow-[0_4px_15px_rgba(0,0,0,0.8)]">
-          مهندسی دقیق فیزیک بدنی؛ <br />
+          هندسة دقيقة للبناء العضلي؛ <br />
           <span className="mt-2 inline-block bg-gradient-to-r from-fitness-primary via-emerald-300 to-white bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(34,197,94,0.5)]">
-            فراتر از تمرینات معمولی
+            أبعد من مجرد تدريب تقليدي
           </span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-zinc-200 sm:text-base drop-shadow-md">
-          برنامه‌ریزی متابولیک و تمرینات تخصصی هایپرتروفی متناسب با بیومتریک
-          انحصاری بدن شما. بدون رژیم‌های طاقت‌فرسا و اتلاف وقت، مسیر علمی کاهش
-          چربی و ساخت عضلات باکیفیت را شروع کنید.
+          برامج تدريبية وتغذوية مبنية على القياسات الحيوية الفريدة لجسمك
+          والتمثيل الغذائي. انطلق نحو خسارة الدهون وبناء كتلة عضلية صافية وفق
+          أحدث الأسس العلمية، دون حرمان أو إهدار للوقت.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
@@ -300,15 +298,15 @@ export default function HeroSection() {
             href="#booking"
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fitness-primary px-8 py-4 text-center font-black text-black shadow-[0_0_35px_rgba(34,197,94,0.5)] transition-all hover:bg-fitness-primary-hover active:scale-[0.98] sm:w-auto"
           >
-            <span>شروع مشاوره و دریافت برنامه</span>
-            <span className="text-sm">←</span>
+            <span>ابدأ الاستشارة واحصل على خطتك</span>
+            <span className="text-sm rtl:rotate-180">←</span>
           </a>
 
           <a
             href="#calculator"
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-950/90 px-6 py-4 text-center text-xs font-bold text-zinc-100 shadow-md backdrop-blur-md transition-all hover:border-fitness-primary hover:text-white sm:w-auto"
           >
-            <span>محاسبه آنی کالری و TDEE</span>
+            <span>حساب السعرات واحتياج الـ TDEE فوراً</span>
           </a>
         </div>
 
@@ -318,7 +316,7 @@ export default function HeroSection() {
               +450
             </p>
             <span className="text-[11px] font-medium text-zinc-400">
-              تغییر موفق فیزیک
+              تحول بدني ناجح
             </span>
           </div>
           <div>
@@ -326,15 +324,15 @@ export default function HeroSection() {
               98٪
             </p>
             <span className="text-[11px] font-medium text-zinc-400">
-              رضایت شاگردان
+              نسبة رضا المشتركين
             </span>
           </div>
           <div>
             <p className="font-mono text-2xl font-black text-white sm:text-3xl">
-              8 سال
+              8 سنوات
             </p>
             <span className="text-[11px] font-medium text-zinc-400">
-              سابقه تخصصی مربی
+              خبرة تدريبية تخصصية
             </span>
           </div>
         </div>

@@ -2,6 +2,24 @@
 
 import React, { useState } from "react";
 
+const DEFAULT_ARABIC_FAQS = [
+  {
+    question: "هل أحتاج بالضرورة إلى الاشتراك في نادٍ رياضي متكامل؟",
+    answer:
+      "لا، يتم تفصيل الخطة التدريبية بالكامل حسب الأدوات المتاحة لديك؛ سواء كان تدريباً في الجيم، أو هوم جيم منزلي، أو تمارين بوزن الجسم وأحبال المقاومة.",
+  },
+  {
+    question: "كيف تتم المتابعة والتواصل مع المدرب بعد الاشتراك؟",
+    answer:
+      "مباشرة بعد التسجيل، يتم فتح قناة تواصل مباشرة وخاصة عبر واتساب لإرسال الجداول، واستلام التقارير الدورية وتحليل التطور أسبوعياً.",
+  },
+  {
+    question: "هل يتضمن النظام الغذائي أطعمة معقدة أو مكلفة؟",
+    answer:
+      "إطلاقاً. تعتمد جميع الأنظمة على خيارات غذائية طبيعية وسهلة الإعداد مع حساب دقيق للسعرات والماكروز بما يتوافق مع ميزانيتك وتفضيلاتك اليومية.",
+  },
+];
+
 function PlusIcon({ className = "h-4 w-4" }) {
   return (
     <svg
@@ -20,35 +38,44 @@ function PlusIcon({ className = "h-4 w-4" }) {
   );
 }
 
-export default function FaqSection({ faqs = FAQS }) {
-  // نگهداری ایندکس سوال باز؛ مقدار null یعنی همه بسته‌اند
+export default function FaqSection({
+  faqs,
+  coachWhatsapp = process.env.NEXT_PUBLIC_COACH_WHATSAPP_PHONE ||
+    "971500000000",
+}) {
+  const activeFaqs =
+    faqs && faqs.length > 0 && !faqs[0]?.question?.includes("آیا")
+      ? faqs
+      : DEFAULT_ARABIC_FAQS;
+
   const [openIndex, setOpenIndex] = useState(null);
 
   const toggleFaq = (idx) => {
     setOpenIndex((prev) => (prev === idx ? null : idx));
   };
 
+  const whatsappDirectUrl = `https://wa.me/${coachWhatsapp.replace(/\+/g, "")}?text=${encodeURIComponent("مرحباً كابتن، لدي استفسار بخصوص برامج التدريب.")}`;
+
   return (
     <section className="relative w-full border-t border-fitness-border py-16 md:py-24 overflow-hidden">
-      {/* هاله نور پس‌زمینه */}
       <div className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fitness-primary/5 blur-[140px]" />
 
       <div className="mx-auto max-w-3xl px-6">
         <div className="mb-12 text-center">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-3">
-            شفافیت قبل از شروع
+            وضوح تام قبل الاشتراك
           </span>
           <h2 className="text-2xl font-black tracking-tight text-white md:text-4xl">
-            سوالات پرتکرار
+            الأسئلة الشائعة
           </h2>
           <p className="mt-2 text-xs text-fitness-muted md:text-sm">
-            پاسخ به متداول‌ترین سوالات شاگردان پیش از ثبت‌نام و شروع دوره
+            إجابات وافية على أكثر استفسارات المشتركين تكراراً قبل بدء البرنامج
           </p>
         </div>
 
-        {/* لیست آکاردئونی تکی (Single-Open Accordion) */}
+        {/* لیست آکاردئونی */}
         <div className="space-y-4">
-          {faqs.map((faq, idx) => {
+          {activeFaqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
             const formattedIdx = String(idx + 1).padStart(2, "0");
 
@@ -61,7 +88,7 @@ export default function FaqSection({ faqs = FAQS }) {
                     : "border-fitness-border hover:border-fitness-border/90"
                 }`}
               >
-                {/* خط نئونی بالای کارت در صورت باز بودن */}
+                {/* خط نئونی بالای کارت */}
                 <div
                   className={`pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-fitness-primary/80 to-transparent transition-opacity duration-300 ${
                     isOpen ? "opacity-100" : "opacity-0"
@@ -93,7 +120,6 @@ export default function FaqSection({ faqs = FAQS }) {
                     </span>
                   </div>
 
-                  {/* دکمه ۳ بعدی با چرخش ۴۵ درجه به ضربدر */}
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 ${
                       isOpen
@@ -105,7 +131,6 @@ export default function FaqSection({ faqs = FAQS }) {
                   </div>
                 </button>
 
-                {/* باز و بسته شدن روان با تکنیک گرید CSS */}
                 <div
                   className={`grid transition-[grid-template-rows] duration-150 ease-out ${
                     isOpen
@@ -113,7 +138,7 @@ export default function FaqSection({ faqs = FAQS }) {
                       : "grid-rows-[0fr] opacity-0 mt-0"
                   }`}
                 >
-                  <div className="overflow-hidden border-r-2 border-fitness-primary/40 pr-4 pt-1">
+                  <div className="overflow-hidden border-s-2 border-fitness-primary/40 ps-4 pt-1">
                     <p className="text-xs leading-relaxed text-fitness-muted md:text-sm">
                       {faq.answer}
                     </p>
@@ -128,20 +153,20 @@ export default function FaqSection({ faqs = FAQS }) {
         <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 text-center sm:flex-row sm:text-right">
           <div>
             <p className="text-xs font-bold text-zinc-200">
-              سوال دیگری دارید که در لیست نبود؟
+              لديك سؤال آخر لم تجد إجابته هنا؟
             </p>
             <p className="mt-0.5 text-[11px] text-zinc-500">
-              می‌توانید مستقیم در تلگرام از مربی بپرسید.
+              يمكنك التواصل مباشرة مع المدرب للإجابة على جميع استفساراتك.
             </p>
           </div>
           <a
-            href="https://t.me/mehrad_amin"
+            href={whatsappDirectUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-fitness-primary/40 bg-fitness-primary/10 px-4 py-2 text-xs font-bold text-fitness-primary transition-colors hover:bg-fitness-primary hover:text-black"
           >
-            <span>چت مستقیم با مربی</span>
-            <span className="text-sm">←</span>
+            <span>تحدث مع المدرب عبر واتساب</span>
+            <span className="text-sm rtl:rotate-180">←</span>
           </a>
         </div>
       </div>

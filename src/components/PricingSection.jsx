@@ -2,6 +2,36 @@
 
 import React, { useState, useRef } from "react";
 
+const DEFAULT_ARABIC_PLANS = [
+  {
+    id: "starter",
+    title: "الباقة الأساسية",
+    duration: "شهر واحد",
+    price: "450 درهم / ر.س",
+    features: [
+      "جدول تمارين مخصص وفق تجهيزاتك (نادي / منزل)",
+      "نظام غذائي محسوب السعرات والماكروز",
+      "تقييم ومتابعة وتحديث الخطة كل أسبوعين",
+      "دعم ومتابعة أسبوعية للإجابة على الاستفسارات",
+    ],
+    isPopular: false,
+  },
+  {
+    id: "pro",
+    title: "باقة التدريب المتقدم VIP",
+    duration: "3 أشهر",
+    price: "1,150 درهم / ر.س",
+    features: [
+      "تصميم جدول تدريبي شامل مع خطة مكملات متخصصة",
+      "نظام غذائي مرن ومتنوع يلائم أسلوب حياتك",
+      "مراجعة فيديوهات التمرين وتصحيح التكنيك باستمرار",
+      "متابعة مباشرة وخاصة عبر واتساب طوال الأسبوع",
+      "تحليل وتتبع أسبوعي للوزن والقياسات ونسبة الدهون",
+    ],
+    isPopular: true,
+  },
+];
+
 function CheckIcon() {
   return (
     <svg
@@ -33,7 +63,6 @@ function PricingCard({ plan }) {
       y: Math.round((y / rect.height) * 100),
     });
 
-    // چرخش ۳ بعدی ظریف (حداکثر ۸ درجه)
     const rotateX = (y / rect.height - 0.5) * -10;
     const rotateY = (x / rect.width - 0.5) * 10;
     setRotate({ x: rotateX, y: rotateY });
@@ -65,7 +94,7 @@ function PricingCard({ plan }) {
           : "border-fitness-border bg-gradient-to-b from-fitness-surface to-[#0b0e11] shadow-[0_15px_35px_rgba(0,0,0,0.6)] hover:border-fitness-border/90"
       }`}
     >
-      {/* نور نئونی تعاملی که زیر لمس دست یا نشانگر ماوس حرکت می‌کند */}
+      {/* نور تعاملی */}
       <div
         className="pointer-events-none absolute -inset-px rounded-[2.5rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-active:opacity-100"
         style={{
@@ -78,7 +107,7 @@ function PricingCard({ plan }) {
         <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-fitness-primary/20 blur-3xl" />
       )}
 
-      {/* بج سه بعدی پیشنهاد مربی (داخل کارت بدون برش) */}
+      {/* بج سه بعدی پیشنهاد مربی */}
       {plan.isPopular && (
         <div className="mb-4 flex items-center justify-start [transform:translateZ(30px)]">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-fitness-primary/50 bg-fitness-primary/15 px-3.5 py-1 text-xs font-black text-fitness-primary shadow-[0_0_15px_rgba(34,197,94,0.25)]">
@@ -86,12 +115,12 @@ function PricingCard({ plan }) {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fitness-primary opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-fitness-primary" />
             </span>
-            <span>پیشنهاد ویژه مربی</span>
+            <span>الخيار الأكثر ترشيحاً</span>
           </span>
         </div>
       )}
 
-      {/* محتوای بالایی کارت با عمق سه‌بعدی */}
+      {/* محتوای بالایی کارت */}
       <div className="relative z-10 [transform:translateZ(20px)]">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-black text-white">{plan.title}</h3>
@@ -122,7 +151,7 @@ function PricingCard({ plan }) {
         </ul>
       </div>
 
-      {/* دکمه انتخاب پلن با افکت پرسپکتیو برجسته */}
+      {/* دکمه انتخاب پلن */}
       <div className="relative z-10 mt-8 [transform:translateZ(25px)]">
         <a
           href="#booking"
@@ -132,35 +161,39 @@ function PricingCard({ plan }) {
               : "border border-fitness-border bg-fitness-surface-light text-fitness-text hover:border-fitness-primary hover:text-white"
           }`}
         >
-          انتخاب این پلن
+          اشترك في هذه الباقة
         </a>
       </div>
     </div>
   );
 }
 
-export default function PricingSection({ plans = PRICING_PLANS }) {
+export default function PricingSection({ plans }) {
+  const activePlans =
+    plans && plans.length > 0 && !plans[0]?.title?.includes("پلن")
+      ? plans
+      : DEFAULT_ARABIC_PLANS;
+
   return (
     <section className="relative w-full border-t border-fitness-border py-16 md:py-24 overflow-hidden">
-      {/* نور محیطی ملایم پس‌زمینه */}
       <div className="pointer-events-none absolute top-1/3 left-1/2 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-fitness-primary/5 blur-[150px]" />
 
       <div className="mx-auto max-w-5xl px-6">
         <div className="mb-12 text-center">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-3">
-            سرمایه‌گذاری روی فیزیک بدنی
+            استثمار في صحتك وبنائك البدني
           </span>
           <h2 className="text-2xl font-black tracking-tight text-white md:text-4xl">
-            پلن‌های کوچینگ و اشتراک
+            باقات التدريب والاشتراكات
           </h2>
           <p className="mt-2 text-xs text-fitness-muted md:text-sm">
-            انتخاب سطح همراهی متناسب با نیاز، اهداف و تعهد شما
+            اختر مستوى المتابعة الذي يتناسب مع أهدافك وجدولك اليومي
           </p>
         </div>
 
-        {/* کارت‌های ۳ بعدی */}
+        {/* کارت‌های سه‌بعدی */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          {plans.map((plan) => (
+          {activePlans.map((plan) => (
             <PricingCard key={plan.id} plan={plan} />
           ))}
         </div>

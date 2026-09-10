@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useId } from "react";
+import React, { useState, useEffect, useId, useSyncExternalStore } from "react";
 
 function FlameIcon({ className = "h-3.5 w-3.5" }) {
   return (
@@ -105,39 +105,71 @@ function UserFemaleIcon({ className = "h-4 w-4" }) {
 }
 
 const ACTIVITY_LEVELS = [
-  { id: "sedentary", factor: "1.2", label: "کم‌تحرک", desc: "بدون تمرین" },
-  { id: "light", factor: "1.375", label: "فعالیت سبک", desc: "۱-۳ جلسه" },
-  { id: "moderate", factor: "1.55", label: "متوسط", desc: "۳-۵ جلسه" },
-  { id: "heavy", factor: "1.725", label: "بسیار سنگین", desc: "۶-۷ جلسه" },
+  { id: "sedentary", factor: "1.2", label: "قليل الحركة", desc: "بدون تمارين" },
+  { id: "light", factor: "1.375", label: "نشاط خفيف", desc: "1-3 حصص" },
+  { id: "moderate", factor: "1.55", label: "نشاط متوسط", desc: "3-5 حصص" },
+  { id: "heavy", factor: "1.725", label: "نشاط مكثف", desc: "6-7 حصص" },
 ];
 
-const getStoredFitnessData = () => {
-  if (typeof window === "undefined") return null;
+// خواندن ایمن و واکنش‌گرا از سشن استوریج بدون خطای هیدریشن و ESLint
+const subscribeSessionStorage = (callback) => {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+};
+
+const getSessionSnapshot = () => {
+  if (typeof window === "undefined") return "";
   try {
-    const saved = sessionStorage.getItem("user_fitness_data");
-    return saved ? JSON.parse(saved) : null;
+    return sessionStorage.getItem("user_fitness_data") || "";
   } catch {
-    return null;
+    return "";
   }
 };
 
-export default function FitnessCalculator() {
-  const [initialData] = useState(getStoredFitnessData);
+const getServerSnapshot = () => "";
 
-  const [gender, setGender] = useState(() => initialData?.gender || "male");
-  const [weight, setWeight] = useState(() => Number(initialData?.weight) || 82);
-  const [height, setHeight] = useState(
-    () => Number(initialData?.height) || 180,
+export default function FitnessCalculator() {
+  const sessionRaw = useSyncExternalStore(
+    subscribeSessionStorage,
+    getSessionSnapshot,
+    getServerSnapshot,
   );
-  const [age, setAge] = useState(() => Number(initialData?.age) || 27);
-  const [activityIdx, setActivityIdx] = useState(() => {
-    if (!initialData?.activity) return 1;
-    const idx = ACTIVITY_LEVELS.findIndex(
-      (a) => a.factor === String(initialData.activity),
-    );
-    return idx !== -1 ? idx : 1;
-  });
-  const [goal, setGoal] = useState(() => initialData?.result?.goalKey || "cut");
+
+  const parsedInitial = React.useMemo(() => {
+    if (!sessionRaw) return null;
+    try {
+      return JSON.parse(sessionRaw);
+    } catch {
+      return null;
+    }
+  }, [sessionRaw]);
+
+  const [gender, setGender] = useState("male");
+  const [weight, setWeight] = useState(82);
+  const [height, setHeight] = useState(180);
+  const [age, setAge] = useState(27);
+  const [activityIdx, setActivityIdx] = useState(1);
+  const [goal, setGoal] = useState("cut");
+
+  // همگام‌سازی اولیه از استور بیرونی با یک پرچم کنترل‌شده
+  const isHydratedFromStore = React.useRef(false);
+  useEffect(() => {
+    if (!isHydratedFromStore.current && parsedInitial) {
+      isHydratedFromStore.current = true;
+      if (parsedInitial.gender) setGender(parsedInitial.gender);
+      if (parsedInitial.weight) setWeight(Number(parsedInitial.weight));
+      if (parsedInitial.height) setHeight(Number(parsedInitial.height));
+      if (parsedInitial.age) setAge(Number(parsedInitial.age));
+      if (parsedInitial.result?.goalKey) setGoal(parsedInitial.result.goalKey);
+      if (parsedInitial.activity) {
+        const idx = ACTIVITY_LEVELS.findIndex(
+          (a) => a.factor === String(parsedInitial.activity),
+        );
+        if (idx !== -1) setActivityIdx(idx);
+      }
+    }
+  }, [parsedInitial]);
 
   const bmrBase = 10 * weight + 6.25 * height - 5 * age;
   const bmr = Math.round(gender === "male" ? bmrBase + 5 : bmrBase - 161);
@@ -161,10 +193,10 @@ export default function FitnessCalculator() {
 
     const goalTitle =
       goal === "cut"
-        ? "کات و چربی‌سوزی"
+        ? "التنشيف وحرق الدهون"
         : goal === "bulk"
-          ? "حجم و عضله‌سازی"
-          : "تثبیت وزن";
+          ? "الضخامة والبناء العضلي"
+          : "تثبيت الوزن واللياقة";
 
     const calcResult = {
       tdee: activeTarget,
@@ -268,17 +300,17 @@ export default function FitnessCalculator() {
               d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
             />
           </svg>
-          <span>پاک‌سازی داده‌ها</span>
+          <span>إعادة تعيين البيانات</span>
         </button>
       </div>
 
-      <div className="relative mt-5 overflow-hidden rounded-3xl border border-fitness-primary/40 bg-gradient-to-b from-[#111815] via-[#09110d] to-black p-6 shadow-[inset_0_0_30px_rgba(34,197,94,0.15)]">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,197,94,0.04)_1px,transparent_1px)] bg-[size:100%_4px]" />
+      <div className="relative mt-5 overflow-hidden rounded-3xl border border-fitness-primary/40 bg-linear-to-b from-[#111815] via-[#09110d] to-black p-6 shadow-[inset_0_0_30px_rgba(34,197,94,0.15)]">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(34,197,94,0.04)_1px,transparent_1px)] bg-size-[100%_4px]" />
 
         <div className="relative z-10 flex flex-col items-center justify-between gap-5 sm:flex-row">
           <div className="text-center sm:text-right">
             <span className="text-[11px] font-semibold text-fitness-muted">
-              تارگت کالری روزانه متناسب با هدف:
+              الهدف اليومي المقترح من السعرات:
             </span>
             <div className="mt-1 flex items-baseline justify-center gap-2 sm:justify-start">
               <span className="font-mono text-5xl font-black tracking-tight text-white drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]">
@@ -290,32 +322,34 @@ export default function FitnessCalculator() {
             </div>
             <div className="mt-1.5 flex items-center justify-center gap-3 text-[11px] text-zinc-400 sm:justify-start">
               <span>
-                BMR: <strong className="text-zinc-200">{bmr}</strong>
+                التمثيل الغذائي BMR:{" "}
+                <strong className="text-zinc-200">{bmr}</strong>
               </span>
               <span>•</span>
               <span>
-                TDEE پایه: <strong className="text-zinc-200">{tdee}</strong>
+                الاحتياج الأساسي TDEE:{" "}
+                <strong className="text-zinc-200">{tdee}</strong>
               </span>
             </div>
           </div>
 
           <div className="flex gap-2 rounded-2xl border border-zinc-800/80 bg-black/60 p-2.5 backdrop-blur-md">
             <div className="flex flex-col items-center px-2">
-              <span className="text-[9px] text-zinc-500">پروتئین</span>
+              <span className="text-[9px] text-zinc-500">بروتين</span>
               <span className="font-mono text-xs font-black text-fitness-primary">
                 {protein}g
               </span>
             </div>
             <div className="h-7 w-px bg-zinc-800" />
             <div className="flex flex-col items-center px-2">
-              <span className="text-[9px] text-zinc-500">کربو</span>
+              <span className="text-[9px] text-zinc-500">كارب</span>
               <span className="font-mono text-xs font-black text-white">
                 {carbs}g
               </span>
             </div>
             <div className="h-7 w-px bg-zinc-800" />
             <div className="flex flex-col items-center px-2">
-              <span className="text-[9px] text-zinc-500">چربی</span>
+              <span className="text-[9px] text-zinc-500">دهون</span>
               <span className="font-mono text-xs font-black text-white">
                 {fats}g
               </span>
@@ -334,7 +368,7 @@ export default function FitnessCalculator() {
             }`}
           >
             <FlameIcon className="h-4 w-4" />
-            <span>کات و چربی‌سوزی</span>
+            <span>تنشيف وحرق دهون</span>
           </button>
           <button
             type="button"
@@ -346,7 +380,7 @@ export default function FitnessCalculator() {
             }`}
           >
             <ScaleIcon className="h-4 w-4" />
-            <span>تثبیت وزن</span>
+            <span>تثبيت الوزن</span>
           </button>
           <button
             type="button"
@@ -358,7 +392,7 @@ export default function FitnessCalculator() {
             }`}
           >
             <BoltIcon className="h-4 w-4" />
-            <span>عضله‌سازی و حجم</span>
+            <span>ضخامة وبناء عضل</span>
           </button>
         </div>
       </div>
@@ -366,7 +400,7 @@ export default function FitnessCalculator() {
       <div className="mt-6 space-y-5">
         <div>
           <span className="mb-2 block text-[11px] font-semibold text-zinc-400">
-            پروفایل فیزیولوژیک:
+            الملف الفسيولوجي والبدني:
           </span>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -379,7 +413,7 @@ export default function FitnessCalculator() {
               }`}
             >
               <UserMaleIcon />
-              <span>مرد / MALE</span>
+              <span>ذكر / MALE</span>
             </button>
             <button
               type="button"
@@ -391,7 +425,7 @@ export default function FitnessCalculator() {
               }`}
             >
               <UserFemaleIcon />
-              <span>زن / FEMALE</span>
+              <span>أنثى / FEMALE</span>
             </button>
           </div>
         </div>
@@ -402,7 +436,7 @@ export default function FitnessCalculator() {
               htmlFor={weightInputId}
               className="text-xs font-bold text-zinc-300"
             >
-              وزن بدن
+              وزن الجسم
             </label>
             <div className="flex items-baseline gap-1">
               <span className="font-mono text-2xl font-black text-fitness-primary">
@@ -434,7 +468,7 @@ export default function FitnessCalculator() {
               htmlFor={heightInputId}
               className="text-xs font-bold text-zinc-300"
             >
-              قد
+              الطول
             </label>
             <div className="flex items-baseline gap-1">
               <span className="font-mono text-2xl font-black text-white">
@@ -466,13 +500,13 @@ export default function FitnessCalculator() {
               htmlFor={ageInputId}
               className="text-xs font-bold text-zinc-300"
             >
-              سن
+              العمر
             </label>
             <div className="flex items-baseline gap-1">
               <span className="font-mono text-2xl font-black text-white">
                 {age}
               </span>
-              <span className="text-[10px] text-zinc-500">سال</span>
+              <span className="text-[10px] text-zinc-500">سنة</span>
             </div>
           </div>
           <input
@@ -486,15 +520,15 @@ export default function FitnessCalculator() {
             className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-800 accent-fitness-primary"
           />
           <div className="mt-1 flex justify-between font-mono text-[9px] text-zinc-600">
-            <span>12 سال</span>
-            <span>50 سال</span>
-            <span>90 سال</span>
+            <span>12 سنة</span>
+            <span>50 سنة</span>
+            <span>90 سنة</span>
           </div>
         </div>
 
         <div>
           <span className="mb-2 block text-[11px] font-semibold text-zinc-400">
-            فرکانس تمرینی در هفته:
+            معدل النشاط الأسبوعي:
           </span>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {ACTIVITY_LEVELS.map((lvl, idx) => (
@@ -531,9 +565,9 @@ export default function FitnessCalculator() {
           href="#booking"
           className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-fitness-primary py-4 text-center font-black text-black shadow-[0_0_30px_rgba(34,197,94,0.35)] transition-all hover:bg-fitness-primary-hover active:scale-[0.98]"
         >
-          <span>دریافت برنامه اختصاصی بر پایه {activeTarget} کالری</span>
+          <span>احصل على خطتك التدريبية بناءً على {activeTarget} سعرة</span>
           <svg
-            className="h-4 w-4"
+            className="h-4 w-4 rtl:rotate-180"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

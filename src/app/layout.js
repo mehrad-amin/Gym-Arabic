@@ -1,12 +1,12 @@
-import { Vazirmatn } from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
 
-const vazirmatn = Vazirmatn({
+const cairo = Cairo({
   subsets: ["arabic", "latin"],
   display: "swap",
-  variable: "--font-vazirmatn",
+  variable: "--font-cairo",
   preload: true,
-  weight: ["400", "700", "900"], // استفاده از وزن‌های اصلی برای کاهش حجم دانلود اولیه فونت
+  weight: ["400", "700", "900"],
 });
 
 export const viewport = {
@@ -16,42 +16,43 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "کوچینگ اختصاصی و برنامه‌ریزی فیتنس | تحول فیزیک بدنی",
+  title: "تدريب شخصي وتصميم جداول فيتنس احترافية | نحو تحول بدني حقيقي",
   description:
-    "طراحی تخصصی برنامه‌های تمرینی، تغذیه علمی و مربیگری حرفه‌ای بدنسازی با نتایج تضمین‌شده و پشتیبانی مستمر.",
+    "تصميم برامج تدريبية وتغذوية علمية متقدمة مع تدريب أونلاين ومتابعة أسبوعية دقيقة لضمان تحقيق أهدافك الرياضية.",
   keywords: [
-    "کوچینگ فیتنس",
-    "برنامه تمرینی بدنسازی",
-    "محاسبه کالری TDEE",
-    "رژیم آنلاین",
-    "مربی خصوصی",
+    "مدرب شخصي أونلاين",
+    "جدول تمارين كمال أجسام",
+    "حساب السعرات والماكروز TDEE",
+    "نظام غذائي للتنشيف",
+    "بناء عضلات",
+    "تدريب خاص دبي والرياض",
   ],
-  authors: [{ name: "مربی و آکادمی فیتنس" }],
+  authors: [{ name: "أكاديمية التدريب واللياقة البدنية" }],
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "کوچینگ اختصاصی و برنامه‌ریزی فیتنس | تحول فیزیک بدنی",
+    title: "تدريب شخصي وتصميم جداول فيتنس احترافية | تحول بدني حقيقي",
     description:
-      "طراحی تخصصی برنامه‌های تمرینی، تغذیه علمی و مربیگری حرفه‌ای بدنسازی با نتایج تضمین‌شده.",
-    locale: "fa_IR",
+      "تصميم برامج تدريبية وتغذوية متقدمة وتدريب أونلاين مع متابعة مستمرة لتحقيق أفضل النتائج.",
+    locale: "ar_AE",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "کوچینگ اختصاصی و برنامه‌ریزی فیتنس",
+    title: "تدريب شخصي وجداول لياقة بدنية احترافية",
     description:
-      "طراحی تخصصی برنامه‌های تمرینی و تغذیه علمی با پشتیبانی مستمر.",
+      "برامج تدريب وتغذية علمية متكاملة مع متابعة مستمرة لتحقيق أهدافك.",
   },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="fa"
+      lang="ar"
       dir="rtl"
-      className={vazirmatn.variable}
+      className={cairo.variable}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-fitness-bg font-sans text-fitness-text selection:bg-fitness-primary selection:text-black antialiased">

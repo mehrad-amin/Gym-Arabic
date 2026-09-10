@@ -57,11 +57,11 @@ export default function FitnessLandingPage() {
       <section className="w-full border-t border-fitness-border py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
-            <h2 className="text-2xl font-black md:text-3xl">
-              نتایج واقعی، بدون فیلتر
+            <h2 className="text-2xl font-black md:text-3xl text-white">
+              نتائج حقيقية بدون فلاتر
             </h2>
             <p className="mt-2 text-sm text-fitness-muted">
-              اسلایدر را بکشید تا تغییرات فیزیک بدنی را مشاهده کنید
+              اسحب المؤشر لمشاهدة الفارق والتحول البدني للمشتركين
             </p>
           </div>
 
@@ -89,11 +89,12 @@ export default function FitnessLandingPage() {
       >
         <div className="mx-auto max-w-3xl px-6">
           <div className="mb-10 text-center">
-            <h2 className="text-2xl font-black md:text-3xl">
-              شروع همکاری و دریافت مشاوره
+            <h2 className="text-2xl font-black md:text-3xl text-white">
+              ابدأ رحلة تحولك واحصل على خطتك
             </h2>
             <p className="mt-2 text-sm text-fitness-muted">
-              فرم زیر را تکمیل کنید تا برنامه اولیه شما آنالیز و تنظیم شود
+              قم بتعبئة النموذج ليتم تحليل بياناتك وتجهيز برنامجك التدريبي
+              والتغذوي
             </p>
           </div>
           <BookingForm />
@@ -104,7 +105,8 @@ export default function FitnessLandingPage() {
       <footer className="w-full border-t border-fitness-border bg-fitness-surface py-8 text-center text-xs text-fitness-muted">
         <div className="mx-auto max-w-6xl px-6">
           <p>
-            © {CURRENT_YEAR} تمامی حقوق برای آکادمی فیتنس و مربیگری محفوظ است.
+            © {CURRENT_YEAR} جميع الحقوق محفوظة لأكاديمية التدريب واللياقة
+            البدنية.
           </p>
           <p className="mt-2 font-mono text-[11px] text-fitness-primary">
             Developed by mehrad_amin

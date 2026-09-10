@@ -2,6 +2,27 @@
 
 import React, { useState, useRef } from "react";
 
+const DEFAULT_SERVICES = [
+  {
+    id: "vip",
+    badge: "الأكثر طلباً",
+    title: "التدريب الشخصي الشامل VIP",
+    desc: "تصميم دقيق لبرامج التمرين والتغذية مع متابعة وتحليل أسبوعي، تصحيح أداء التمارين وتواصل مباشر 24/7.",
+  },
+  {
+    id: "cut",
+    badge: "برنامج تخصصي",
+    title: "برنامج التنشيف وحرق الدهون العلمي",
+    desc: "خسارة قصوى لنسبة الدهون بالجسم مع الحفاظ التام على الكتلة العضلية بدون حميات قاسية أو حرمان غير منطقي.",
+  },
+  {
+    id: "bulk",
+    badge: "نتائج مضمونة",
+    title: "برنامج التضخيم والبناء العضلي",
+    desc: "أنظمة تدريبية مبنية على الزيادة التدريجية للأحمال تتوافق مع جيناتك وطبيعة جسمك الفريدة لتحقيق أقصى ضخامة.",
+  },
+];
+
 function ServiceIcon({ id }) {
   if (id === "vip" || id === 1) {
     return (
@@ -70,12 +91,11 @@ function ServiceIcon({ id }) {
   );
 }
 
-export default function MethodologySection({ services = SERVICES }) {
+export default function MethodologySection({ services = DEFAULT_SERVICES }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // تابع انتقال چرخشی به کارت بعدی (بدون بن‌بست)
   const goToNextCard = () => {
     setActiveIndex((prev) => (prev + 1) % services.length);
   };
@@ -91,7 +111,6 @@ export default function MethodologySection({ services = SERVICES }) {
 
   const handleTouchEnd = () => {
     const diff = Math.abs(touchStartX.current - touchEndX.current);
-    // چه کاربر به چپ بکشد چه به راست، با حداقل ۳۰ پیکسل سوایپ به کارت بعدی می‌رود
     if (diff > 30) {
       goToNextCard();
     }
@@ -105,17 +124,18 @@ export default function MethodologySection({ services = SERVICES }) {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-8 text-center md:mb-12">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-2.5">
-            مسیر تمرینی نتیجه‌محور
+            مسار تدريبي قائم على النتائج
           </span>
           <h2 className="text-2xl font-black tracking-tight md:text-4xl text-white">
-            متدولوژی و دوره‌های تمرینی
+            المنهجية والبرامج التدريبية
           </h2>
           <p className="mt-1.5 text-xs text-fitness-muted md:text-sm">
-            طراحی‌شده طبق استانداردهای روز بیومکانیک و هایپرتروفی
+            مصممة وفق أحدث معايير الميكانيكا الحيوية وفرط النمو العضلي
+            (Hypertrophy)
           </p>
         </div>
 
-        {/* ۱. نمای موبایل: ۳D Coverflow فیت و چرخش نامحدود */}
+        {/* ۱. نمای موبایل: ۳D Coverflow */}
         <div
           className="relative block md:hidden w-full select-none cursor-pointer"
           onTouchStart={handleTouchStart}
@@ -123,13 +143,11 @@ export default function MethodologySection({ services = SERVICES }) {
           onTouchEnd={handleTouchEnd}
           onClick={goToNextCard}
         >
-          {/* ارتفاع فیت‌شده روی 240 پیکسل بدون فضای مرده */}
           <div
             className="relative mx-auto h-[240px] w-full max-w-[320px]"
             style={{ perspective: "900px" }}
           >
             {services.map((s, index) => {
-              // محاسبه موقعیت نسبی در حلقه نامحدود (Infinite Loop)
               const count = services.length;
               let diff = (index - activeIndex) % count;
               if (diff < -Math.floor(count / 2)) diff += count;
@@ -137,7 +155,9 @@ export default function MethodologySection({ services = SERVICES }) {
 
               const isActive = diff === 0;
               const isVIP =
-                s.badge?.includes("پرطرفدار") || s.id === "vip" || index === 0;
+                s.badge?.includes("الأكثر طلباً") ||
+                s.id === "vip" ||
+                index === 0;
 
               let transformStyle = "";
               let zIndex = 10 - Math.abs(diff);
@@ -147,12 +167,10 @@ export default function MethodologySection({ services = SERVICES }) {
                 transformStyle =
                   "translateZ(35px) translateX(0px) rotateY(0deg) scale(1)";
               } else if (diff === 1) {
-                // کارت بعدی
                 transformStyle =
                   "translateZ(-60px) translateX(-45px) rotateY(14deg) scale(0.92)";
                 opacity = 0.55;
               } else if (diff === -1) {
-                // کارت قبلی
                 transformStyle =
                   "translateZ(-60px) translateX(45px) rotateY(-14deg) scale(0.92)";
                 opacity = 0.55;
@@ -199,8 +217,8 @@ export default function MethodologySection({ services = SERVICES }) {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-fitness-border/40 pt-2.5 text-[11px] font-semibold text-fitness-primary">
-                    <span>انتخاب و دریافت برنامه</span>
-                    <span className="text-xs">←</span>
+                    <span>اختر الخطة واحصل على برنامجك</span>
+                    <span className="text-xs rtl:rotate-180">←</span>
                   </div>
                 </div>
               );
@@ -222,13 +240,13 @@ export default function MethodologySection({ services = SERVICES }) {
                     ? "w-6 bg-fitness-primary shadow-[0_0_8px_rgba(34,197,94,0.6)]"
                     : "w-1.5 bg-fitness-border"
                 }`}
-                aria-label={`دوره ${idx + 1}`}
+                aria-label={`البرنامج ${idx + 1}`}
               />
             ))}
           </div>
 
           <p className="mt-2 text-center text-[10px] text-fitness-muted/70">
-            برای رفتن به دوره بعدی، به چپ/راست بکشید یا لمس کنید
+            اسحب لليمين أو اليسار للتنقل بين البرامج التدريبية
           </p>
         </div>
 
@@ -236,7 +254,9 @@ export default function MethodologySection({ services = SERVICES }) {
         <div className="hidden md:grid md:grid-cols-3 gap-6">
           {services.map((s, index) => {
             const isVIP =
-              s.badge?.includes("پرطرفدار") || s.id === "vip" || index === 0;
+              s.badge?.includes("الأكثر طلباً") ||
+              s.id === "vip" ||
+              index === 0;
             return (
               <div
                 key={s.id || index}
@@ -269,8 +289,8 @@ export default function MethodologySection({ services = SERVICES }) {
                 </div>
 
                 <div className="mt-6 flex items-center gap-2 border-t border-fitness-border/50 pt-4 text-xs font-semibold text-fitness-text/80 group-hover:text-fitness-primary transition-colors">
-                  <span>مشاهده جزئیات دوره</span>
-                  <span className="transition-transform group-hover:-translate-x-1">
+                  <span>عرض تفاصيل البرنامج</span>
+                  <span className="transition-transform group-hover:-translate-x-1 rtl:rotate-180">
                     ←
                   </span>
                 </div>

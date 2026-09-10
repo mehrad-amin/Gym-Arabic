@@ -5,22 +5,22 @@ import { useState, useEffect } from "react";
 const INITIAL_FORM_DATA = {
   name: "",
   phone: "",
-  goal: "کات و چربی‌سوزی",
-  experience: "زیر ۶ ماه (مبتدی)",
+  goal: "التنشيف وحرق الدهون",
+  experience: "مبتدئ (أقل من 6 أشهر)",
   notes: "",
 };
 
 const GOAL_OPTIONS = [
-  "کات و چربی‌سوزی",
-  "افزایش حجم و عضله‌سازی",
-  "آمادگی جسمانی و سلامت",
-  "آماده‌سازی مسابقات",
+  "التنشيف وحرق الدهون",
+  "الضخامة والبناء العضلي",
+  "اللياقة والصحة العامة",
+  "الإعداد للبطولات والمنافسات",
 ];
 
 const EXPERIENCE_OPTIONS = [
-  "زیر ۶ ماه (مبتدی)",
-  "۱ تا ۳ سال (متوسط)",
-  "بیش از ۳ سال (پیشرفته)",
+  "مبتدئ (أقل من 6 أشهر)",
+  "متوسط (1 إلى 3 سنوات)",
+  "متقدم (أكثر من 3 سنوات)",
 ];
 
 function SuccessCheckIcon() {
@@ -40,36 +40,37 @@ function SuccessCheckIcon() {
 
 export default function BookingForm() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-
-  const [calcData, setCalcData] = useState(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const stored = sessionStorage.getItem("user_fitness_data");
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [calcData, setCalcData] = useState(null);
 
   const [status, setStatus] = useState({
     loading: false,
     success: false,
     error: "",
   });
-  const [coachUsername, setCoachUsername] = useState("");
+  const [coachPhone, setCoachPhone] = useState("");
 
+  // جلوگیری از خطای Hydration با خواندن اطلاعات کلاینتی پس از mount شدن کامل
   useEffect(() => {
+    setIsMounted(true);
+    try {
+      const stored = sessionStorage.getItem("user_fitness_data");
+      if (stored) {
+        setCalcData(JSON.parse(stored));
+      }
+    } catch (_) {}
+
     const handleUpdate = (event) => {
       const data = event?.detail || null;
       setCalcData(data);
 
       if (data?.result?.goalKey) {
         if (data.result.goalKey === "cut") {
-          setFormData((prev) => ({ ...prev, goal: "کات و چربی‌سوزی" }));
+          setFormData((prev) => ({ ...prev, goal: "التنشيف وحرق الدهون" }));
         } else if (data.result.goalKey === "bulk") {
-          setFormData((prev) => ({ ...prev, goal: "افزایش حجم و عضله‌سازی" }));
+          setFormData((prev) => ({ ...prev, goal: "الضخامة والبناء العضلي" }));
         } else if (data.result.goalKey === "maintain") {
-          setFormData((prev) => ({ ...prev, goal: "آمادگی جسمانی و سلامت" }));
+          setFormData((prev) => ({ ...prev, goal: "اللياقة والصحة العامة" }));
         }
       }
     };
@@ -125,13 +126,13 @@ export default function BookingForm() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || "خطایی در ثبت اطلاعات رخ داد.");
+        throw new Error(
+          data.error || "حدث خطأ أثناء تسجيل البيانات، يرجى المحاولة لاحقاً.",
+        );
       }
 
-      setCoachUsername(
-        data.coachTelegramUsername ||
-          process.env.NEXT_PUBLIC_COACH_TELEGRAM_USERNAME ||
-          "",
+      setCoachPhone(
+        data.coachPhone || process.env.NEXT_PUBLIC_COACH_WHATSAPP_PHONE || "",
       );
       setStatus({ loading: false, success: true, error: "" });
 
@@ -143,15 +144,19 @@ export default function BookingForm() {
       setStatus({
         loading: false,
         success: false,
-        error: err.message || "خطایی رخ داده است.",
+        error: err.message || "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى.",
       });
     }
   };
 
   if (status.success) {
-    const telegramDirectUrl = coachUsername
-      ? `https://t.me/${coachUsername.replace("@", "")}`
-      : "https://t.me";
+    // ایجاد متن خودکار برای پیام واتس‌اپ
+    const waText = encodeURIComponent(
+      `مرحباً كابتن، قمت بالتسجيل عبر الموقع للحصول على خطة تدريبية.\nالاسم: ${formData.name}\nالهدف: ${formData.goal}`,
+    );
+    const whatsappDirectUrl = coachPhone
+      ? `https://wa.me/${coachPhone.replace(/\+/g, "")}?text=${waText}`
+      : "https://wa.me/";
 
     return (
       <div className="relative overflow-hidden rounded-[2.5rem] border border-fitness-primary/40 bg-gradient-to-b from-[#101b14] via-fitness-surface to-black p-8 text-center shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(34,197,94,0.15)] md:p-12">
@@ -160,22 +165,22 @@ export default function BookingForm() {
         </div>
 
         <h3 className="mt-6 text-2xl font-black text-white">
-          اطلاعات شما با موفقیت ثبت شد!
+          تم تسجيل بياناتك بنجاح!
         </h3>
         <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-fitness-muted md:text-sm">
-          مشخصات بدنی و اطلاعات تماس برای مربی ارسال گردید. برای تسریع در آنالیز
-          و دریافت برنامه، می‌توانید مستقیماً وارد تلگرام شوید.
+          تم استلام ملفك الرياضي وأرقام التواصل. لتسريع عملية التحليل وبدء
+          استلام جدولك التدريبي، يمكنك بدء المحادثة مباشرة عبر واتساب.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
-            href={telegramDirectUrl}
+            href={whatsappDirectUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fitness-primary px-8 py-4 font-black text-black shadow-[0_0_25px_rgba(34,197,94,0.35)] transition-all hover:bg-fitness-primary-hover active:scale-[0.98] sm:w-auto"
           >
-            <span>ارتباط مستقیم با مربی در تلگرام</span>
-            <span className="text-sm">←</span>
+            <span>التواصل المباشر مع المدرب عبر واتساب</span>
+            <span className="text-sm rtl:rotate-180">←</span>
           </a>
 
           <button
@@ -186,7 +191,7 @@ export default function BookingForm() {
             }}
             className="w-full rounded-2xl border border-fitness-border bg-zinc-950/70 px-6 py-4 text-xs font-bold text-zinc-300 transition-colors hover:text-white sm:w-auto"
           >
-            ثبت فرم جدید
+            تسجيل نموذج جديد
           </button>
         </div>
       </div>
@@ -201,18 +206,17 @@ export default function BookingForm() {
   const goalName =
     calcData?.result?.goal ||
     (calcData?.result?.goalKey === "bulk"
-      ? "افزایش حجم و عضله‌سازی"
+      ? "الضخامة والبناء العضلي"
       : calcData?.result?.goalKey === "maintain"
-        ? "آمادگی جسمانی و سلامت"
-        : "کات و چربی‌سوزی");
+        ? "اللياقة والصحة العامة"
+        : "التنشيف وحرق الدهون");
 
   return (
     <div className="relative overflow-hidden rounded-[2.5rem] border border-fitness-border bg-gradient-to-b from-fitness-surface via-[#0d1110] to-black p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] md:p-10">
-      {/* هاله نور نئونی گوشه فرم */}
       <div className="pointer-events-none absolute -top-20 -left-20 h-64 w-64 rounded-full bg-fitness-primary/10 blur-[100px]" />
 
-      {/* کارت الصاق آنالیز ماشین‌حساب به سبک هاب بیومتریک */}
-      {calcData && (
+      {/* رندر شدن بخش هاب بیومتریک تنها پس از تأیید کلاینت (حل خطای هیدریشن) */}
+      {isMounted && calcData && (
         <div className="mb-8 overflow-hidden rounded-2xl border border-fitness-primary/40 bg-gradient-to-r from-fitness-primary/10 via-[#0d1a12] to-black p-4 shadow-[0_0_25px_rgba(34,197,94,0.12)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
@@ -221,7 +225,7 @@ export default function BookingForm() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-fitness-primary" />
               </span>
               <span className="font-mono text-xs font-bold tracking-wider text-fitness-primary">
-                بیومتریک متصل شد:
+                البيانات الحيوية المرتبطة:
               </span>
             </div>
 
@@ -230,26 +234,26 @@ export default function BookingForm() {
               onClick={handleClearCalcData}
               className="cursor-pointer text-[11px] text-zinc-400 underline transition-colors hover:text-red-400"
             >
-              حذف داده‌ها
+              مسح البيانات
             </button>
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 text-center font-mono">
             <div className="rounded-xl border border-zinc-800/80 bg-black/50 p-2">
-              <span className="text-[10px] text-zinc-500 font-sans">وزن</span>
+              <span className="text-[10px] text-zinc-500 font-sans">الوزن</span>
               <p className="text-xs font-bold text-white">
                 {calcData.weight} kg
               </p>
             </div>
             <div className="rounded-xl border border-zinc-800/80 bg-black/50 p-2">
-              <span className="text-[10px] text-zinc-500 font-sans">قد</span>
+              <span className="text-[10px] text-zinc-500 font-sans">الطول</span>
               <p className="text-xs font-bold text-white">
                 {calcData.height} cm
               </p>
             </div>
             <div className="rounded-xl border border-zinc-800/80 bg-black/50 p-2">
               <span className="text-[10px] text-zinc-500 font-sans">
-                تارگت کالری
+                السعرات اليومية
               </span>
               <p className="text-xs font-bold text-fitness-primary">
                 {displayCalories} kcal
@@ -257,7 +261,7 @@ export default function BookingForm() {
             </div>
             <div className="rounded-xl border border-zinc-800/80 bg-black/50 p-2">
               <span className="text-[10px] text-zinc-500 font-sans">
-                استراتژی
+                الاستراتيجية
               </span>
               <p className="text-xs font-bold text-emerald-400 truncate font-sans">
                 {goalName}
@@ -274,7 +278,7 @@ export default function BookingForm() {
               htmlFor="booking-name"
               className="mb-2 block text-xs font-medium text-fitness-muted"
             >
-              نام و نام خانوادگی
+              الاسم الكامل
             </label>
             <input
               id="booking-name"
@@ -283,7 +287,7 @@ export default function BookingForm() {
               required
               value={formData.name}
               onChange={handleChange}
-              placeholder="مثال: علی رضایی"
+              placeholder="مثال: أحمد المطيري"
               className="w-full rounded-xl border border-fitness-border bg-zinc-950/70 p-3.5 text-sm text-fitness-text outline-none transition-colors focus:border-fitness-primary"
             />
           </div>
@@ -293,7 +297,7 @@ export default function BookingForm() {
               htmlFor="booking-phone"
               className="mb-2 block text-xs font-medium text-fitness-muted"
             >
-              شماره تماس (جهت هماهنگی و پشتیبانی)
+              رقم الواتساب (للتواصل والمتابعة)
             </label>
             <input
               id="booking-phone"
@@ -303,7 +307,7 @@ export default function BookingForm() {
               dir="ltr"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="0912xxxxxxx"
+              placeholder="+971 50 xxx xxxx"
               className="w-full rounded-xl border border-fitness-border bg-zinc-950/70 p-3.5 text-right font-mono text-sm text-fitness-text outline-none transition-colors focus:border-fitness-primary"
             />
           </div>
@@ -314,7 +318,7 @@ export default function BookingForm() {
             htmlFor="booking-goal"
             className="mb-2 block text-xs font-medium text-fitness-muted"
           >
-            هدف اصلی از دوره
+            الهدف الأساسي من البرنامج
           </label>
           <select
             id="booking-goal"
@@ -331,10 +335,10 @@ export default function BookingForm() {
           </select>
         </div>
 
-        {/* سابقه تمرین به شکل دکمه‌های لمسی ارگونومیک */}
+        {/* سابقه تمرین */}
         <div>
           <span className="mb-2 block text-xs font-medium text-fitness-muted">
-            سابقه تمرین منظم
+            الخبرة في التدريب المنتظم
           </span>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {EXPERIENCE_OPTIONS.map((exp) => (
@@ -359,7 +363,7 @@ export default function BookingForm() {
             htmlFor="booking-notes"
             className="mb-2 block text-xs font-medium text-fitness-muted"
           >
-            توضیحات تکمیلی یا آسیب‌دیدگی مفصلی (اختیاری)
+            ملاحظات إضافية أو إصابات سابقة (اختياري)
           </label>
           <textarea
             id="booking-notes"
@@ -367,7 +371,7 @@ export default function BookingForm() {
             name="notes"
             value={formData.notes}
             onChange={handleChange}
-            placeholder="هرگونه آسیب‌دیدگی، شرایط پزشکی یا ترجیحات غذایی خاص..."
+            placeholder="أي إصابات مفاصل، تفضيلات غذائية أو ملاحظات خاصة ترغب بمشاركتها..."
             className="w-full rounded-xl border border-fitness-border bg-zinc-950/70 p-3.5 text-sm text-fitness-text outline-none transition-colors focus:border-fitness-primary"
           />
         </div>
@@ -384,8 +388,8 @@ export default function BookingForm() {
           className="w-full cursor-pointer rounded-2xl bg-fitness-primary py-4 text-center font-black text-black shadow-[0_0_30px_rgba(34,197,94,0.35)] transition-all hover:bg-fitness-primary-hover active:scale-[0.98] disabled:opacity-50"
         >
           {status.loading
-            ? "در حال ثبت و ارسال به ربات..."
-            : "شروع مشاوره و دریافت برنامه اختصاصی"}
+            ? "جاري إرسال البيانات وحجز الخطة..."
+            : "ابدأ الاستشارة واحصل على جدولك الخاص"}
         </button>
       </form>
     </div>

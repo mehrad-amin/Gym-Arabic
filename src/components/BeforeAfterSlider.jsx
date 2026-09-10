@@ -12,7 +12,7 @@ export default function BeforeAfterSlider({ item }) {
     setSliderPosition(Number(e.target.value));
   };
 
-  // محاسبه زاویه چرخش ۳ بعدی بر اساس موقعیت اسلایدر (از -4 تا +4 درجه)
+  // محاسبه زاویه چرخش ۳ بعدی بر اساس موقعیت اسلایدر
   const tiltY = ((sliderPosition - 50) / 50) * 4.5;
   const offsetPercent = 100 - sliderPosition;
 
@@ -64,16 +64,15 @@ export default function BeforeAfterSlider({ item }) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover object-center"
           />
-          {/* خط اسکن خطی بسیار محو روی تصویر قبل */}
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px]" />
         </div>
 
-        {/* خط لیزر اسکن نئونی ۳ بعدی */}
+        {/* خط لیزر اسکن نئونی */}
         <div
           className="pointer-events-none absolute top-0 bottom-0 w-[2px] bg-fitness-primary shadow-[0_0_15px_rgba(34,197,94,1),0_0_30px_rgba(34,197,94,0.6)]"
           style={{ right: `${offsetPercent}%` }}
         >
-          {/* هندل اسلایدر دایره‌ای متالیک */}
+          {/* هندل اسلایدر */}
           <div className="absolute top-1/2 -right-4 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border-2 border-black bg-fitness-primary shadow-[0_0_18px_rgba(34,197,94,0.9)]">
             <svg
               className="h-3.5 w-3.5 text-black"
@@ -91,7 +90,7 @@ export default function BeforeAfterSlider({ item }) {
           </div>
         </div>
 
-        {/* برچسب‌های شناور ۳ بعدی (Glass Badges) */}
+        {/* برچسب‌های شیشه‌ای */}
         <span className="pointer-events-none absolute top-3.5 right-3.5 rounded-xl border border-white/10 bg-black/65 px-3 py-1 text-[11px] font-black text-white shadow-lg backdrop-blur-md">
           بعد
         </span>
@@ -99,7 +98,7 @@ export default function BeforeAfterSlider({ item }) {
           قبل
         </span>
 
-        {/* اینپوت رنج لمسی تمام‌صفحه */}
+        {/* ورودی لمسی */}
         <input
           type="range"
           min="0"
@@ -111,16 +110,16 @@ export default function BeforeAfterSlider({ item }) {
           onTouchStart={() => setIsInteracting(true)}
           onTouchEnd={() => setIsInteracting(false)}
           className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0 touch-pan-y"
-          aria-label="اسلایدر مقایسه قبل و بعد"
+          aria-label="مؤشر مقارنة قبل وبعد"
         />
 
-        {/* راهنمای کوچک لمس در پایین تصویر */}
+        {/* راهنمای لمس */}
         <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/50 px-3 py-0.5 text-[10px] text-zinc-300 backdrop-blur-md">
-          اسلایدر را بکشید
+          اسحب المؤشر للمقارنة
         </div>
       </div>
 
-      {/* اطلاعات کارنامه شاگرد با لایه‌بندی شفاف */}
+      {/* جزئیات تحول شاگرد */}
       <div className="mt-4 px-1.5">
         <div className="flex items-center justify-between">
           <span className="text-base font-black tracking-tight text-white">
