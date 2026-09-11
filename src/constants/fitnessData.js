@@ -93,8 +93,8 @@ export const FAQS = [
 ];
 
 export const CONTACT_INFO = {
-  phone: "+989305002816",
-  displayPhone: "+98 930 500 2816",
+  phone: "+968 9123 4567",
+  displayPhone: "+968 9123 4567",
   whatsappNumber: "989305002816",
   whatsappUrl: "https://wa.me/989305002816",
   instagramUsername: "your_test_page",
