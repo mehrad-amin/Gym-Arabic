@@ -2,9 +2,32 @@
 
 import { useState, useEffect } from "react";
 
+const PLAN_OPTIONS = [
+  {
+    id: "starter",
+    title: "الباقة الأساسية",
+    duration: "شهر واحد",
+    price: "450 درهم / ر.س",
+  },
+  {
+    id: "pro",
+    title: "باقة التدريب المتقدم VIP",
+    duration: "3 أشهر",
+    price: "1,150 درهم / ر.س",
+    badge: "الأكثر طلباً",
+  },
+  {
+    id: "elite",
+    title: "باقة التحول الشامل VIP",
+    duration: "6 أشهر",
+    price: "1,950 درهم / ر.س",
+  },
+];
+
 const INITIAL_FORM_DATA = {
   name: "",
   phone: "",
+  selectedPlan: "pro", // پیش‌فرض پلن محبوب
   goal: "التنشيف وحرق الدهون",
   experience: "مبتدئ (أقل من 6 أشهر)",
   notes: "",
@@ -50,7 +73,6 @@ export default function BookingForm() {
   });
   const [coachPhone, setCoachPhone] = useState("");
 
-  // جلوگیری از خطای Hydration با خواندن اطلاعات کلاینتی پس از mount شدن کامل
   useEffect(() => {
     setIsMounted(true);
     try {
@@ -59,6 +81,13 @@ export default function BookingForm() {
         setCalcData(JSON.parse(stored));
       }
     } catch (_) {}
+
+    // گوش دادن به تغییر پلن از بخش تعرفه‌ها (در صورت ارسال رویداد)
+    const handlePlanSelect = (e) => {
+      if (e.detail?.planId) {
+        setFormData((prev) => ({ ...prev, selectedPlan: e.detail.planId }));
+      }
+    };
 
     const handleUpdate = (event) => {
       const data = event?.detail || null;
@@ -76,8 +105,12 @@ export default function BookingForm() {
     };
 
     window.addEventListener("fitness_calc_updated", handleUpdate);
-    return () =>
+    window.addEventListener("fitness_plan_selected", handlePlanSelect);
+
+    return () => {
       window.removeEventListener("fitness_calc_updated", handleUpdate);
+      window.removeEventListener("fitness_plan_selected", handlePlanSelect);
+    };
   }, []);
 
   const handleChange = (e) => {
@@ -94,6 +127,9 @@ export default function BookingForm() {
     } catch (_) {}
     setCalcData(null);
   };
+
+  const selectedPlanDetails =
+    PLAN_OPTIONS.find((p) => p.id === formData.selectedPlan) || PLAN_OPTIONS[1];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,6 +152,8 @@ export default function BookingForm() {
         body: JSON.stringify({
           name: formData.name,
           phone: formData.phone,
+          selectedPlan: selectedPlanDetails.title,
+          planDuration: selectedPlanDetails.duration,
           goal: formData.goal,
           experience: formData.experience,
           notes: formData.notes,
@@ -150,9 +188,9 @@ export default function BookingForm() {
   };
 
   if (status.success) {
-    // ایجاد متن خودکار برای پیام واتس‌اپ
+    // درج دقیق دوره انتخاب‌شده در پیام واتس‌اپ
     const waText = encodeURIComponent(
-      `مرحباً كابتن، قمت بالتسجيل عبر الموقع للحصول على خطة تدريبية.\nالاسم: ${formData.name}\nالهدف: ${formData.goal}`,
+      `مرحباً كابتن، قمت بالتسجيل عبر الموقع للحصول على خطة تدريبية.\nالاسم: ${formData.name}\nالباقة المختارة: ${selectedPlanDetails.title} (${selectedPlanDetails.duration})\nالهدف: ${formData.goal}`,
     );
     const whatsappDirectUrl = coachPhone
       ? `https://wa.me/${coachPhone.replace(/\+/g, "")}?text=${waText}`
@@ -167,9 +205,12 @@ export default function BookingForm() {
         <h3 className="mt-6 text-2xl font-black text-white">
           تم تسجيل بياناتك بنجاح!
         </h3>
-        <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-fitness-muted md:text-sm">
-          تم استلام ملفك الرياضي وأرقام التواصل. لتسريع عملية التحليل وبدء
-          استلام جدولك التدريبي، يمكنك بدء المحادثة مباشرة عبر واتساب.
+        <p className="mx-auto mt-2 text-sm text-fitness-primary font-bold">
+          تم تثبيت اختيارك: {selectedPlanDetails.title} ({selectedPlanDetails.duration})
+        </p>
+        <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-fitness-muted md:text-sm">
+          تم استلام ملفك الرياضي. لتسريع عملية التحليل وبدء استلام جدولك
+          التدريبي، يمكنك بدء المحادثة مباشرة مع الكابتن عبر واتساب.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -179,7 +220,7 @@ export default function BookingForm() {
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fitness-primary px-8 py-4 font-black text-black shadow-[0_0_25px_rgba(34,197,94,0.35)] transition-all hover:bg-fitness-primary-hover active:scale-[0.98] sm:w-auto"
           >
-            <span>التواصل المباشر مع المدرب عبر واتساب</span>
+            <span>تأكيد الحجز ومراسلة المدرب عبر واتساب</span>
             <span className="text-sm rtl:rotate-180">←</span>
           </a>
 
@@ -215,7 +256,7 @@ export default function BookingForm() {
     <div className="relative overflow-hidden rounded-[2.5rem] border border-fitness-border bg-gradient-to-b from-fitness-surface via-[#0d1110] to-black p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] md:p-10">
       <div className="pointer-events-none absolute -top-20 -left-20 h-64 w-64 rounded-full bg-fitness-primary/10 blur-[100px]" />
 
-      {/* رندر شدن بخش هاب بیومتریک تنها پس از تأیید کلاینت (حل خطای هیدریشن) */}
+      {/* اطلاعات بیومتریک در صورت محاسبه ماشین حساب */}
       {isMounted && calcData && (
         <div className="mb-8 overflow-hidden rounded-2xl border border-fitness-primary/40 bg-gradient-to-r from-fitness-primary/10 via-[#0d1a12] to-black p-4 shadow-[0_0_25px_rgba(34,197,94,0.12)]">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -271,7 +312,75 @@ export default function BookingForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* ۱. بخش جدید: انتخاب دوره و پلن تمرینی */}
+        <div>
+          <label className="mb-2.5 block text-xs font-bold text-white">
+            اختر الباقة التدريبية المناسبة لك
+            <span className="text-fitness-primary ms-1">*</span>
+          </label>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {PLAN_OPTIONS.map((plan) => {
+              const isSelected = formData.selectedPlan === plan.id;
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({ ...prev, selectedPlan: plan.id }))
+                  }
+                  className={`relative flex flex-col justify-between rounded-2xl border p-4 text-start transition-all ${
+                    isSelected
+                      ? "border-fitness-primary bg-gradient-to-b from-fitness-primary/20 via-fitness-surface to-black shadow-[0_0_20px_rgba(34,197,94,0.22)] ring-1 ring-fitness-primary/50"
+                      : "border-fitness-border bg-zinc-950/60 hover:border-zinc-700"
+                  }`}
+                >
+                  {plan.badge && (
+                    <span className="absolute -top-2.5 end-3 rounded-full border border-fitness-primary/50 bg-fitness-primary px-2 py-0.5 text-[9px] font-black text-black">
+                      {plan.badge}
+                    </span>
+                  )}
+
+                  <div className="flex w-full items-center justify-between">
+                    <span
+                      className={`text-xs font-black ${
+                        isSelected ? "text-fitness-primary" : "text-white"
+                      }`}
+                    >
+                      {plan.title}
+                    </span>
+                    <span
+                      className={`flex h-4 w-4 items-center justify-center rounded-full border transition-colors ${
+                        isSelected
+                          ? "border-fitness-primary bg-fitness-primary"
+                          : "border-zinc-700 bg-transparent"
+                      }`}
+                    >
+                      {isSelected && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-black" />
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex items-baseline justify-between border-t border-fitness-border/40 pt-2.5">
+                    <span className="text-[11px] font-semibold text-fitness-muted">
+                      {plan.duration}
+                    </span>
+                    <span className="font-mono text-xs font-bold text-white">
+                      {plan.price.split(" ")[0]}{" "}
+                      <span className="text-[9px] font-sans text-fitness-muted">
+                        درهم
+                      </span>
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ۲. نام و شماره واتساپ */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label
@@ -313,6 +422,7 @@ export default function BookingForm() {
           </div>
         </div>
 
+        {/* ۳. هدف تمرینی */}
         <div>
           <label
             htmlFor="booking-goal"
@@ -335,7 +445,7 @@ export default function BookingForm() {
           </select>
         </div>
 
-        {/* سابقه تمرین */}
+        {/* ۴. سابقه تمرین */}
         <div>
           <span className="mb-2 block text-xs font-medium text-fitness-muted">
             الخبرة في التدريب المنتظم
@@ -358,6 +468,7 @@ export default function BookingForm() {
           </div>
         </div>
 
+        {/* ۵. توضیحات اختیاری */}
         <div>
           <label
             htmlFor="booking-notes"
@@ -382,6 +493,7 @@ export default function BookingForm() {
           </p>
         )}
 
+        {/* دکمه سابمیت */}
         <button
           type="submit"
           disabled={status.loading}
@@ -389,7 +501,7 @@ export default function BookingForm() {
         >
           {status.loading
             ? "جاري إرسال البيانات وحجز الخطة..."
-            : "ابدأ الاستشارة واحصل على جدولك الخاص"}
+            : `تأكيد اشتراك ${selectedPlanDetails.title} والبدء فوراً`}
         </button>
       </form>
     </div>

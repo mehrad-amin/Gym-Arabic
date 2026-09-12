@@ -12,6 +12,7 @@ import HeroSection from "@/components/HeroSection";
 import MethodologySection from "@/components/MethodologySection";
 import PricingSection from "@/components/PricingSection";
 import FaqSection from "@/components/FaqSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
 
 function CheckIcon() {
   return (
@@ -37,23 +38,13 @@ const CURRENT_YEAR = new Date().getFullYear();
 export default function FitnessLandingPage() {
   return (
     <main className="flex flex-col items-center justify-between">
-      {/* هیرو سکشن */}
+      {/* ۱. هیرو سکشن */}
       <HeroSection />
 
-      {/* سرویس‌ها و متدها */}
+      {/* ۲. سرویس‌ها و متدولوژی علمی */}
       <MethodologySection services={SERVICES} />
 
-      {/* ماشین حساب BMR / TDEE */}
-      <section
-        id="calculator"
-        className="w-full border-t border-fitness-border py-20"
-      >
-        <div className="mx-auto max-w-4xl px-6">
-          <FitnessCalculator />
-        </div>
-      </section>
-
-      {/* نتایج و تحول شاگردان */}
+      {/* ۳. اثبات بصری: نتایج واقعی قبل و بعد (انتقال به قبل از ماشین‌حساب) */}
       <section className="w-full border-t border-fitness-border py-20">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-12 text-center">
@@ -73,16 +64,29 @@ export default function FitnessLandingPage() {
         </div>
       </section>
 
-      {/* تعرفه‌ها و پکیج‌ها */}
+      {/* ۴. اثبات روایی: نظرات و رضایت شاگردان */}
+      <TestimonialsSection />
+
+      {/* ۵. ماشین‌حساب BMR / TDEE (ارزیابی وضعیت بدنی خود کاربر) */}
+      <section
+        id="calculator"
+        className="w-full border-t border-fitness-border py-20"
+      >
+        <div className="mx-auto max-w-4xl px-6">
+          <FitnessCalculator />
+        </div>
+      </section>
+
+      {/* ۶. تعرفه‌ها و پکیج‌ها */}
       <PricingSection plans={PRICING_PLANS} />
 
-      {/* سوالات متداول */}
+      {/* ۷. سوالات متداول (رفع شک و تردیدها راجع به هزینه‌ها و نحوه ارسال برنامه) */}
       <FaqSection faqs={FAQS} />
 
-      {/* بخش راه‌های ارتباطی و موقعیت مکانی */}
+      {/* ۸. راه‌های ارتباطی و اطلاعات تماس سریع */}
       <ContactSection />
 
-      {/* فرم ثبت نام */}
+      {/* ۹. فرم نهایی ثبت‌نام (آخرین گام کاربر قبل از فوتر) */}
       <section
         id="booking"
         className="w-full border-t border-fitness-border py-20"
@@ -101,7 +105,7 @@ export default function FitnessLandingPage() {
         </div>
       </section>
 
-      {/* فوتر */}
+      {/* ۱۰. فوتر */}
       <footer className="w-full border-t border-fitness-border bg-fitness-surface py-8 text-center text-xs text-fitness-muted">
         <div className="mx-auto max-w-6xl px-6">
           <p>

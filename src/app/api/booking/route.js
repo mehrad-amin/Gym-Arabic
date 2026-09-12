@@ -6,7 +6,19 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { name, phone, goal, experience, notes, calculatedStats } = body;
+    const {
+      name,
+      phone,
+      goal,
+      experience,
+      notes,
+      calculatedStats,
+      selectedPlan,
+      planDuration,
+    } = body;
+
+    const chosenPlanTitle = selectedPlan || "باقة غير محددة";
+    const chosenPlanDuration = planDuration ? ` (${planDuration})` : "";
 
     const coachEmail = process.env.COACH_EMAIL;
     const coachPhone = process.env.COACH_WHATSAPP_PHONE || "971500000000";
@@ -39,6 +51,7 @@ export async function POST(req) {
 
     // متن پیش‌فرضی که در چت واتس‌اپ مربی با شاگرد باز می‌شود
     const whatsappGreeting = `مرحباً ${name}، استلمت تفاصيل تسجيلك في البرنامج التدريبي عبر الموقع:
+- الباقة المختارة: ${chosenPlanTitle}${chosenPlanDuration}
 - الهدف: ${goal}
 ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم | السعرات: ${targetCalories} kcal` : ""}
 جاهز نبدأ خطتك التدريبية؟`;
@@ -47,7 +60,7 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
       whatsappGreeting,
     )}`;
 
-    // ساخت قالب شیک و تفکیک‌شده ایمیل با گزارش کامل بیومتریک
+    // ساخت قالب شیک و تفکیک‌شده ایمیل با گزارش کامل بیومتریک و پلن انتخابی
     const emailHtml = `
       <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0c1012; color: #f4f4f5; padding: 25px; border-radius: 18px; max-width: 600px; margin: 0 auto; border: 1px solid #27272a;">
         
@@ -60,7 +73,7 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
           <p style="color: #a1a1aa; font-size: 13px; margin: 0;">تفاصيل المشترك وتحليلات الفحص الحيوي (Bio-Scanner)</p>
         </div>
 
-        <!-- کارت اطلاعات فردی و تماس -->
+        <!-- کارت اطلاعات فردی، دوره انتخابی و تماس -->
         <div style="background-color: #141418; padding: 18px; border-radius: 14px; border: 1px solid #282832; margin-bottom: 16px;">
           <h3 style="color: #22c55e; margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid #27272a; padding-bottom: 8px;">
             👤 البيانات الشخصية والتواصل
@@ -69,6 +82,10 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
             <tr>
               <td style="padding: 6px 0; color: #a1a1aa; width: 35%;">اسم المشترك:</td>
               <td style="padding: 6px 0; color: #ffffff; font-weight: bold;">${name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #a1a1aa;">الباقة المطلوبة:</td>
+              <td style="padding: 6px 0; color: #22c55e; font-weight: bold;">${chosenPlanTitle}${chosenPlanDuration}</td>
             </tr>
             <tr>
               <td style="padding: 6px 0; color: #a1a1aa;">رقم الواتساب:</td>
@@ -177,12 +194,12 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
       </div>
     `;
 
-    // ارسال ایمیل
+    // ارسال ایمیل با موضوع شامل نام، پلن و هدف
     if (process.env.RESEND_API_KEY && coachEmail) {
       await resend.emails.send({
         from: "Fitness Lead <onboarding@resend.dev>",
         to: coachEmail,
-        subject: `🔔 مشترك جديد: ${name} (${goal}) - ${targetCalories} kcal`,
+        subject: `🔔 مشترك جديد: ${name} [${chosenPlanTitle}] - (${goal})`,
         html: emailHtml,
       });
     }
