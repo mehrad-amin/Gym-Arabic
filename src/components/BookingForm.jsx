@@ -72,6 +72,7 @@ export default function BookingForm() {
     error: "",
   });
   const [coachPhone, setCoachPhone] = useState("");
+  const [fileId, setFileId] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
@@ -172,6 +173,7 @@ export default function BookingForm() {
       setCoachPhone(
         data.coachPhone || process.env.NEXT_PUBLIC_COACH_WHATSAPP_PHONE || "",
       );
+      setFileId(data.fileId || "");
       setStatus({ loading: false, success: true, error: "" });
 
       try {
@@ -188,9 +190,10 @@ export default function BookingForm() {
   };
 
   if (status.success) {
-    // درج دقیق دوره انتخاب‌شده در پیام واتس‌اپ
+    // پیام کوتاه، شیک و محترمانه همراه با شماره پرونده برای ارسال به مربی در واتساپ
+    const fileTag = fileId ? `\n📁 رقم الملف:\n\`\`\`${fileId}\`\`\`` : "";
     const waText = encodeURIComponent(
-      `مرحباً كابتن، قمت بالتسجيل عبر الموقع للحصول على خطة تدريبية.\nالاسم: ${formData.name}\nالباقة المختارة: ${selectedPlanDetails.title} (${selectedPlanDetails.duration})\nالهدف: ${formData.goal}`,
+      `مرحباً كابتن 👋\nأنا ${formData.name}، قمت بالتسجيل عبر الموقع في:\n- ${selectedPlanDetails.title} (${selectedPlanDetails.duration})${fileTag}\n\nجاهز لمتابعة الخطة والبدء معك إن شاء الله.`,
     );
     const whatsappDirectUrl = coachPhone
       ? `https://wa.me/${coachPhone.replace(/\+/g, "")}?text=${waText}`
@@ -206,7 +209,8 @@ export default function BookingForm() {
           تم تسجيل بياناتك بنجاح!
         </h3>
         <p className="mx-auto mt-2 text-sm text-fitness-primary font-bold">
-          تم تثبيت اختيارك: {selectedPlanDetails.title} ({selectedPlanDetails.duration})
+          تم تثبيت اختيارك: {selectedPlanDetails.title} (
+          {selectedPlanDetails.duration})
         </p>
         <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-fitness-muted md:text-sm">
           تم استلام ملفك الرياضي. لتسريع عملية التحليل وبدء استلام جدولك
@@ -228,6 +232,7 @@ export default function BookingForm() {
             type="button"
             onClick={() => {
               setFormData(INITIAL_FORM_DATA);
+              setFileId("");
               setStatus({ loading: false, success: false, error: "" });
             }}
             className="w-full rounded-2xl border border-fitness-border bg-zinc-950/70 px-6 py-4 text-xs font-bold text-zinc-300 transition-colors hover:text-white sm:w-auto"
@@ -478,7 +483,7 @@ export default function BookingForm() {
           </label>
           <textarea
             id="booking-notes"
-            rows="3"
+            rows="4"
             name="notes"
             value={formData.notes}
             onChange={handleChange}

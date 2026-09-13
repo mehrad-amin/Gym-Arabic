@@ -3,6 +3,13 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// تابع کمکی تولید کد پرونده اختصاصی (بدون وابستگی خارجی)
+function generateFileId() {
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const timePart = Date.now().toString().slice(-3);
+  return `FIT-${randomPart}${timePart}`;
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -16,6 +23,9 @@ export async function POST(req) {
       selectedPlan,
       planDuration,
     } = body;
+
+    // ایجاد کد پرونده اختصاصی برای این شاگرد
+    const fileId = generateFileId();
 
     const chosenPlanTitle = selectedPlan || "باقة غير محددة";
     const chosenPlanDuration = planDuration ? ` (${planDuration})` : "";
@@ -51,6 +61,7 @@ export async function POST(req) {
 
     // متن پیش‌فرضی که در چت واتس‌اپ مربی با شاگرد باز می‌شود
     const whatsappGreeting = `مرحباً ${name}، استلمت تفاصيل تسجيلك في البرنامج التدريبي عبر الموقع:
+- رقم الملف: #${fileId}
 - الباقة المختارة: ${chosenPlanTitle}${chosenPlanDuration}
 - الهدف: ${goal}
 ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم | السعرات: ${targetCalories} kcal` : ""}
@@ -70,7 +81,10 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
             🔔 اشتراك جديد في الموقع
           </span>
           <h2 style="color: #ffffff; margin: 12px 0 4px 0; font-size: 22px;">طلب خطة تدريبية جديدة</h2>
-          <p style="color: #a1a1aa; font-size: 13px; margin: 0;">تفاصيل المشترك وتحليلات الفحص الحيوي (Bio-Scanner)</p>
+          <div style="display: inline-block; margin-top: 6px; background-color: #1f2937; color: #38bdf8; padding: 3px 10px; border-radius: 6px; font-family: monospace; font-size: 13px; font-weight: bold;">
+            رقم الملف: #${fileId}
+          </div>
+          <p style="color: #a1a1aa; font-size: 13px; margin: 8px 0 0 0;">تفاصيل المشترك وتحليلات الفحص الحيوي (Bio-Scanner)</p>
         </div>
 
         <!-- کارت اطلاعات فردی، دوره انتخابی و تماس -->
@@ -80,7 +94,11 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
           </h3>
           <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
             <tr>
-              <td style="padding: 6px 0; color: #a1a1aa; width: 35%;">اسم المشترك:</td>
+              <td style="padding: 6px 0; color: #a1a1aa; width: 35%;">رقم الملف:</td>
+              <td style="padding: 6px 0; color: #38bdf8; font-weight: bold; font-family: monospace;">#${fileId}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #a1a1aa;">اسم المشترك:</td>
               <td style="padding: 6px 0; color: #ffffff; font-weight: bold;">${name}</td>
             </tr>
             <tr>
@@ -194,18 +212,19 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
       </div>
     `;
 
-    // ارسال ایمیل با موضوع شامل نام، پلن و هدف
+    // ارسال ایمیل با موضوع شامل کد پرونده، نام، پلن و هدف
     if (process.env.RESEND_API_KEY && coachEmail) {
       await resend.emails.send({
         from: "Fitness Lead <onboarding@resend.dev>",
         to: coachEmail,
-        subject: `🔔 مشترك جديد: ${name} [${chosenPlanTitle}] - (${goal})`,
+        subject: `[#${fileId}] 🔔 مشترك جديد: ${name} [${chosenPlanTitle}] - (${goal})`,
         html: emailHtml,
       });
     }
 
     return NextResponse.json({
       success: true,
+      fileId: fileId,
       coachPhone: coachPhone,
       message: "Lead successfully recorded and emailed to coach",
     });
