@@ -1,61 +1,8 @@
+// src/components/TestimonialsSection.jsx
 "use client";
 
 import React, { useState, useRef } from "react";
-
-const SPOTLIGHT_REVIEWS = [
-  {
-    id: "spotlight-1",
-    clientName: "سلطان المنصوري",
-    role: "رجل أعمال - دبي",
-    program: "برنامج التحول الشامل VIP",
-    statNumber: "-15 كغ",
-    statLabel: "خسارة دهون صافية",
-    duration: "التزام 16 أسبوعاً",
-    quote:
-      "البرنامج نقلة استثنائية في جودة حياتي ونشاطي اليومي. كنت أظن أن مشاغلي وسفري الدائم يمنعاني من الوصول لهذا القوام، لكن المتابعة المخصصة على مدار الساعة غيرت قواعد اللعبة بالكامل.",
-    rating: 5,
-    tag: "قصة نجاح نخبوية",
-  },
-  {
-    id: "spotlight-2",
-    clientName: "م. فهد العتيبي",
-    role: "مهندس معماري - الرياض",
-    program: "برنامج التنشيف الميكانيكي",
-    statNumber: "9.8%",
-    statLabel: "نسبة الدهون الحالية",
-    duration: "التزام 12 أسبوعاً",
-    quote:
-      "الدقة في تصحيح التكنيك وتحليل الزوايا المفصلية حمتني من تفاقم إصابة كتف قديمة. اليوم أرفع أوزاني بثقة، وبطني منحوتة كما لم تكن من قبل.",
-    rating: 5,
-    tag: "تحول قياسي",
-  },
-  {
-    id: "spotlight-3",
-    clientName: "د. خالد السويدي",
-    role: "استشاري جراحة - الدوحة",
-    program: "برنامج التضخيم والبناء العضلي",
-    statNumber: "+6.5 كغ",
-    statLabel: "كتلة عضلية صافية",
-    duration: "التزام 24 أسبوعاً",
-    quote:
-      "كطبيب، احترمت جداً منهجية حساب فرط النمو العضلي (Hypertrophy) وموازنة الجهد العصبي. لا توجد عشوائية أو هدر للطاقة؛ كل تمرين محسوب بالمللي.",
-    rating: 5,
-    tag: "بناء علمي",
-  },
-  {
-    id: "spotlight-4",
-    clientName: "عبدالرحمن البلوشي",
-    role: "مدير تنفيذي - مسقط",
-    program: "برنامج الأداء الرياضي الخاص",
-    statNumber: "100%",
-    statLabel: "استعادة اللياقة والنشاط",
-    duration: "التزام 10 أسابيع",
-    quote:
-      "النظام الغذائي بدون حرمان قاسي هو ما جعل الاستمرارية سهلة وغير مجهدة. فقدت الشحم وحافظت على طاقتي في العمل واجتماعاتي بدون خمول.",
-    rating: 5,
-    tag: "نتائج مستدامة",
-  },
-];
+import { SPOTLIGHT_REVIEWS, PAGE_CONTENT } from "@/constants/fitnessData";
 
 function RatingStars({ count = 5 }) {
   return (
@@ -63,7 +10,7 @@ function RatingStars({ count = 5 }) {
       {[...Array(count)].map((_, i) => (
         <svg
           key={i}
-          className="h-3.5 w-3.5 fill-fitness-primary drop-shadow-[0_0_6px_rgba(34,197,94,0.45)]"
+          className="h-3.5 w-3.5 fill-fitness-primary drop-shadow-[0_0_6px_rgba(204,255,0,0.45)]"
           viewBox="0 0 20 20"
         >
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -73,14 +20,17 @@ function RatingStars({ count = 5 }) {
   );
 }
 
-export default function CenteredSpotlightSlider() {
+export default function TestimonialsSection({ lang = "ar" }) {
+  const reviews = SPOTLIGHT_REVIEWS[lang] || SPOTLIGHT_REVIEWS.ar;
+  const t = PAGE_CONTENT.testimonials?.[lang] || PAGE_CONTENT.testimonials?.ar;
+
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollContainerRef = useRef(null);
   const cardRefs = useRef([]);
   const isProgrammaticScroll = useRef(false);
   const scrollTimeout = useRef(null);
 
-  const total = SPOTLIGHT_REVIEWS.length;
+  const total = reviews.length;
 
   const scrollToCard = (index) => {
     const targetCard = cardRefs.current[index];
@@ -139,27 +89,24 @@ export default function CenteredSpotlightSlider() {
   };
 
   return (
-    <section
-      dir="rtl"
-      className="relative w-full overflow-hidden py-14 md:py-24"
-    >
+    <section className="relative w-full overflow-hidden py-14 md:py-24">
       {/* هاله نور پس‌زمینه */}
       <div className="pointer-events-none absolute top-1/2 start-1/2 -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fitness-primary/10 blur-[130px]" />
 
       {/* سربرگ */}
       <div className="mx-auto max-w-6xl px-6 mb-8 text-center md:mb-12">
-        <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-2.5 shadow-[0_0_10px_rgba(34,197,94,0.15)]">
-          توثيق حقيقي وملموس
+        <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-2.5 shadow-[0_0_10px_rgba(204,255,0,0.15)]">
+          {t?.badge}
         </span>
         <h2 className="text-2xl font-black tracking-tight md:text-4xl text-white">
-          تجارب تصنع الفارق
+          {t?.title}
         </h2>
         <p className="mt-1.5 text-xs text-fitness-muted md:text-sm max-w-lg mx-auto">
-          نخبة من المشتركين يتحدثون عن كواليس تحولهم البدني والتزامهم بالبرنامج
+          {t?.subtitle}
         </p>
       </div>
 
-      {/* کانتینر اسلایدر با هماهنگی روان و سخت‌افزاری */}
+      {/* کانتینر اسلایدر */}
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
@@ -171,7 +118,7 @@ export default function CenteredSpotlightSlider() {
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {SPOTLIGHT_REVIEWS.map((review, index) => {
+        {reviews.map((review, index) => {
           const isActive = index === activeIndex;
 
           return (
@@ -185,22 +132,22 @@ export default function CenteredSpotlightSlider() {
                 transform: isActive ? "scale(1)" : "scale(0.92)",
                 opacity: isActive ? 1 : 0.4,
               }}
-              className="shrink-0 cursor-pointer select-none transition-all duration-500 ease-out will-change-transform w-[80vw] sm:w-[500px] md:w-[600px]"
+              className="shrink-0 cursor-pointer select-none transition-all duration-500 ease-out will-change-transform w-[80vw] sm:w-[500px] md:w-[600px] text-start"
             >
               <div
                 className={`relative flex flex-col justify-between rounded-3xl border p-5 sm:p-7 md:p-8 backdrop-blur-xl transition-all duration-300 ${
                   isActive
-                    ? "border-fitness-primary/50 bg-gradient-to-b from-fitness-surface via-[#0a140d] to-black shadow-[0_12px_35px_rgba(34,197,94,0.16)]"
+                    ? "border-fitness-primary/50 bg-gradient-to-b from-fitness-surface via-[#0a140d] to-black shadow-[0_12px_35px_rgba(204,255,0,0.16)]"
                     : "border-fitness-border bg-fitness-surface"
                 }`}
               >
-                {/* ردیف بالا: بج و آمار عددی */}
+                {/* ردیف بالا: ستاره‌ها و بج */}
                 <div className="flex items-center justify-between gap-2 border-b border-fitness-border/40 pb-4">
                   <RatingStars count={review.rating} />
                   <span
                     className={`rounded-full px-3 py-0.5 text-[11px] font-bold ${
                       isActive
-                        ? "border border-fitness-primary/40 bg-fitness-primary/15 text-fitness-primary shadow-[0_0_10px_rgba(34,197,94,0.2)]"
+                        ? "border border-fitness-primary/40 bg-fitness-primary/15 text-fitness-primary shadow-[0_0_10px_rgba(204,255,0,0.2)]"
                         : "border border-fitness-border bg-fitness-surface-light text-fitness-muted"
                     }`}
                   >
@@ -208,9 +155,9 @@ export default function CenteredSpotlightSlider() {
                   </span>
                 </div>
 
-                {/* آمار عددی تغییر وزن */}
+                {/* آمار عددی تغییر وزن/ترکیب بدنی */}
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-fitness-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]">
+                  <span className="text-2xl sm:text-3xl font-black text-fitness-primary drop-shadow-[0_0_8px_rgba(204,255,0,0.4)] font-mono">
                     {review.statNumber}
                   </span>
                   <span className="text-xs font-semibold text-fitness-muted">
@@ -262,44 +209,46 @@ export default function CenteredSpotlightSlider() {
         </div>
 
         <div className="flex items-center gap-2.5">
+          {/* دکمه قبلی با SVG هماهنگ RTL/LTR */}
           <button
             type="button"
             onClick={handlePrev}
-            aria-label="السابق"
-            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-fitness-border bg-fitness-surface text-white transition-all hover:border-fitness-primary hover:text-fitness-primary active:scale-95"
+            aria-label={t?.prevBtn || "Previous"}
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-fitness-border bg-fitness-surface text-white transition-all hover:border-fitness-primary hover:text-fitness-primary active:scale-95 cursor-pointer shadow-md"
           >
             <svg
-              className="h-5 w-5"
+              className="h-5 w-5 transition-transform rtl:rotate-180"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              strokeWidth="2.2"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 5l7 7-7 7"
+                d="M15.75 19.5L8.25 12l7.5-7.5"
               />
             </svg>
           </button>
 
+          {/* دکمه بعدی با SVG هماهنگ RTL/LTR */}
           <button
             type="button"
             onClick={handleNext}
-            aria-label="التالي"
-            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-fitness-border bg-fitness-surface text-white transition-all hover:border-fitness-primary hover:text-fitness-primary active:scale-95"
+            aria-label={t?.nextBtn || "Next"}
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-fitness-border bg-fitness-surface text-white transition-all hover:border-fitness-primary hover:text-fitness-primary active:scale-95 cursor-pointer shadow-md"
           >
             <svg
-              className="h-5 w-5"
+              className="h-5 w-5 transition-transform rtl:rotate-180"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              strokeWidth="2.2"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 19l-7-7 7-7"
+                d="M8.25 4.5l7.5 7.5-7.5 7.5"
               />
             </svg>
           </button>

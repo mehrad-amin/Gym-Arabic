@@ -1,50 +1,25 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { PRICING_PLANS } from "@/constants/fitnessData";
 
-const DEFAULT_ARABIC_PLANS = [
-  {
-    id: "starter",
-    title: "الباقة الأساسية",
-    duration: "شهر واحد",
-    price: "450 درهم / ر.س",
-    features: [
-      "جدول تمارين مخصص وفق تجهيزاتك (نادي / منزل)",
-      "نظام غذائي محسوب السعرات والماكروز",
-      "تقييم ومتابعة وتحديث الخطة كل أسبوعين",
-      "دعم ومتابعة أسبوعية للإجابة على الاستفسارات",
-    ],
-    isPopular: false,
+const PRICING_UI_TEXT = {
+  ar: {
+    badge: "استثمار في صحتك وبنائك البدني",
+    title: "باقات التدريب والاشتراكات",
+    subtitle: "اختر مستوى المتابعة الذي يتناسب مع أهدافك وجدولك اليومي",
+    popularBadge: "الخيار الأكثر ترشيحاً",
+    ctaButton: "اشترك في هذه الباقة",
   },
-  {
-    id: "pro",
-    title: "باقة التدريب المتقدم VIP",
-    duration: "3 أشهر",
-    price: "1,150 درهم / ر.س",
-    features: [
-      "تصميم جدول تدريبي شامل مع خطة مكملات متخصصة",
-      "نظام غذائي مرن ومتنوع يلائم أسلوب حياتك",
-      "مراجعة فيديوهات التمرين وتصحيح التكنيك باستمرار",
-      "متابعة مباشرة وخاصة عبر واتساب طوال الأسبوع",
-      "تحليل وتتبع أسبوعي للوزن والقياسات ونسبة الدهون",
-    ],
-    isPopular: true,
+  en: {
+    badge: "Invest in Your Health & Physique",
+    title: "Coaching Plans & Subscriptions",
+    subtitle:
+      "Choose the level of accountability that fits your goals and lifestyle",
+    popularBadge: "Most Recommended",
+    ctaButton: "Get Started with This Plan",
   },
-  {
-    id: "elite",
-    title: "باقة التحول الشامل VIP",
-    duration: "6 أشهر",
-    price: "1,950 درهم / ر.س",
-    features: [
-      "برنامج تدريبي وتغذوي متقدم مع إعادة ضبط مستمرة",
-      "متابعة يومية مباشرة وتصحيح فوري لأداء التمارين",
-      "خطة خاصة لتثبيت الوزن والمحافظة على النتيجة",
-      "استشارات غذائية وتعديل الجداول أثناء السفر",
-      "أولوية التواصل المباشر 24/7 طوال فترة الاشتراك",
-    ],
-    isPopular: false,
-  },
-];
+};
 
 function CheckIcon() {
   return (
@@ -60,7 +35,7 @@ function CheckIcon() {
   );
 }
 
-function PricingCard({ plan }) {
+function PricingCard({ plan, ui }) {
   const cardRef = useRef(null);
   const [coords, setCoords] = useState({ x: 50, y: 50 });
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
@@ -108,7 +83,7 @@ function PricingCard({ plan }) {
           : "border-fitness-border bg-gradient-to-b from-fitness-surface to-[#0b0e11] shadow-[0_15px_35px_rgba(0,0,0,0.6)] hover:border-fitness-border/90"
       }`}
     >
-      {/* نور تعاملی */}
+      {/* نور تعاملی ماوس */}
       <div
         className="pointer-events-none absolute -inset-px rounded-[2rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-active:opacity-100"
         style={{
@@ -118,10 +93,10 @@ function PricingCard({ plan }) {
 
       {/* هاله پشت پلن ویژه */}
       {plan.isPopular && (
-        <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-fitness-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute -top-16 -end-16 h-36 w-36 rounded-full bg-fitness-primary/20 blur-3xl" />
       )}
 
-      {/* بج سه بعدی پیشنهاد مربی */}
+      {/* بج سه بعدی پلن برگزیده */}
       <div className="min-h-[32px] flex items-center justify-start [transform:translateZ(30px)]">
         {plan.isPopular && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-fitness-primary/50 bg-fitness-primary/15 px-3 py-1 text-xs font-black text-fitness-primary shadow-[0_0_15px_rgba(34,197,94,0.25)]">
@@ -129,12 +104,12 @@ function PricingCard({ plan }) {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-fitness-primary opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-fitness-primary" />
             </span>
-            <span>الخيار الأكثر ترشيحاً</span>
+            <span>{ui.popularBadge}</span>
           </span>
         )}
       </div>
 
-      {/* محتوای بالایی کارت */}
+      {/* محتوای متنی کارت */}
       <div className="relative z-10 [transform:translateZ(20px)] mt-2">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-lg font-black text-white whitespace-nowrap">
@@ -145,14 +120,14 @@ function PricingCard({ plan }) {
           </span>
         </div>
 
-        {/* قیمت در یک خط بدون شکستن */}
+        {/* قیمت */}
         <div className="mt-4 flex items-baseline">
           <p className="text-2xl xl:text-3xl font-black tracking-tight text-fitness-primary drop-shadow-[0_0_12px_rgba(34,197,94,0.3)] whitespace-nowrap">
             {plan.price}
           </p>
         </div>
 
-        {/* لیست ویژگی‌ها */}
+        {/* لیست امکانات */}
         <ul className="mt-6 space-y-3 border-t border-fitness-border/60 pt-5">
           {plan.features.map((feat, index) => (
             <li
@@ -168,7 +143,7 @@ function PricingCard({ plan }) {
         </ul>
       </div>
 
-      {/* دکمه انتخاب پلن */}
+      {/* دکمه اقدام */}
       <div className="relative z-10 mt-6 [transform:translateZ(25px)]">
         <a
           href="#booking"
@@ -178,44 +153,40 @@ function PricingCard({ plan }) {
               : "border border-fitness-border bg-fitness-surface-light text-fitness-text hover:border-fitness-primary hover:text-white"
           }`}
         >
-          اشترك في هذه الباقة
+          {ui.ctaButton}
         </a>
       </div>
     </div>
   );
 }
 
-export default function PricingSection({ plans }) {
+export default function PricingSection({ plans, lang = "ar" }) {
+  const ui = PRICING_UI_TEXT[lang] || PRICING_UI_TEXT.ar;
+
   const activePlans =
-    plans && plans.length > 0 && !plans[0]?.title?.includes("پلن")
-      ? plans
-      : DEFAULT_ARABIC_PLANS;
+    plans && plans.length > 0 ? plans : PRICING_PLANS[lang] || PRICING_PLANS.ar;
 
   return (
-    <section
-      className="relative w-full border-t border-fitness-border py-16 md:py-24 overflow-hidden"
-      dir="rtl"
-    >
-      <div className="pointer-events-none absolute top-1/3 left-1/2 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-fitness-primary/5 blur-[150px]" />
+    <section className="relative w-full border-t border-fitness-border py-16 md:py-24 overflow-hidden">
+      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 -z-10 h-96 w-96 rounded-full bg-fitness-primary/5 blur-[150px]" />
 
-      {/* تغییر مهم: افزایش عرض حداکثر کانتینر برای پهن شدن کارت‌ها */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-3">
-            استثمار في صحتك وبنائك البدني
+            {ui.badge}
           </span>
           <h2 className="text-2xl font-black tracking-tight text-white md:text-4xl">
-            باقات التدريب والاشتراكات
+            {ui.title}
           </h2>
           <p className="mt-2 text-xs text-fitness-muted md:text-sm">
-            اختر مستوى المتابعة الذي يتناسب مع أهدافك وجدولك اليومي
+            {ui.subtitle}
           </p>
         </div>
 
-        {/* گرید ۳ ستونه متوازن در دسکتاپ و ۱ ستونه در موبایل */}
+        {/* گرید کارت‌های قیمت */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {activePlans.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} />
+            <PricingCard key={plan.id} plan={plan} ui={ui} />
           ))}
         </div>
       </div>

@@ -1,12 +1,22 @@
-import { Cairo } from "next/font/google";
+import { Tajawal, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const cairo = Cairo({
+// فونت لوکس و مدرن عربی
+const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
   display: "swap",
-  variable: "--font-cairo",
+  variable: "--font-arabic",
   preload: true,
-  weight: ["400", "700", "900"],
+  weight: ["400", "500", "700", "800"],
+});
+
+// فونت مدرن و مینیمال انگلیسی
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-english",
+  preload: true,
+  weight: ["400", "600", "700", "800"],
 });
 
 export const viewport = {
@@ -16,9 +26,9 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "تدريب شخصي وتصميم جداول فيتنس احترافية | نحو تحول بدني حقيقي",
+  title: "تدريب شخصي وتصميم جداول فيتنس احترافية | Elite Online Coaching",
   description:
-    "تصميم برامج تدريبية وتغذوية علمية متقدمة مع تدريب أونلاين ومتابعة أسبوعية دقيقة لضمان تحقيق أهدافك الرياضية.",
+    "تصميم برامج تدريبية وتغذوية علمية متقدمة مع تدريب أونلاين ومتابعة أسبوعية دقيقة - Personalized Online Fitness Coaching",
   keywords: [
     "مدرب شخصي أونلاين",
     "جدول تمارين كمال أجسام",
@@ -26,6 +36,8 @@ export const metadata = {
     "نظام غذائي للتنشيف",
     "بناء عضلات",
     "تدريب خاص دبي والرياض",
+    "VIP Fitness Coach Dubai",
+    "Online Coaching GCC",
   ],
   authors: [{ name: "أكاديمية التدريب واللياقة البدنية" }],
   robots: {
@@ -52,7 +64,7 @@ export default function RootLayout({ children }) {
     <html
       lang="ar"
       dir="rtl"
-      className={cairo.variable}
+      className={`${tajawal.variable} ${plusJakartaSans.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-fitness-bg font-sans text-fitness-text selection:bg-fitness-primary selection:text-black antialiased">

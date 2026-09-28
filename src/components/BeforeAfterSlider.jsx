@@ -1,9 +1,10 @@
+// src/components/BeforeAfterSlider.jsx
 "use client";
 
 import { useState, useRef } from "react";
 import Image from "next/image";
 
-export default function BeforeAfterSlider({ item }) {
+export default function BeforeAfterSlider({ item, lang = "ar" }) {
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isInteracting, setIsInteracting] = useState(false);
   const containerRef = useRef(null);
@@ -12,9 +13,19 @@ export default function BeforeAfterSlider({ item }) {
     setSliderPosition(Number(e.target.value));
   };
 
-  // محاسبه زاویه چرخش ۳ بعدی بر اساس موقعیت اسلایدر
+  const isRtl = lang === "ar";
   const tiltY = ((sliderPosition - 50) / 50) * 4.5;
   const offsetPercent = 100 - sliderPosition;
+
+  // متن‌های دوزبانه داخل کارت
+  const t = {
+    before: isRtl ? "قبل" : "Before",
+    after: isRtl ? "بعد" : "After",
+    hint: isRtl ? "اسحب المؤشر للمقارنة" : "Drag slider to compare",
+    ariaLabel: isRtl
+      ? "مؤشر مقارنة قبل وبعد"
+      : "Before and after comparison slider",
+  };
 
   return (
     <div
@@ -27,7 +38,7 @@ export default function BeforeAfterSlider({ item }) {
           ? "none"
           : "transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1)",
       }}
-      className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-fitness-border/90 bg-gradient-to-b from-fitness-surface to-[#0c0f12] p-4 shadow-[0_15px_35px_rgba(0,0,0,0.6)] transition-colors hover:border-fitness-primary/40"
+      className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-fitness-border/90 bg-gradient-to-b from-fitness-surface to-[#0c0f12] p-4 shadow-[0_15px_35px_rgba(0,0,0,0.6)] transition-colors hover:border-fitness-primary/40 w-full"
     >
       {/* هاله نور نئونی پشت کارت */}
       <div
@@ -45,9 +56,9 @@ export default function BeforeAfterSlider({ item }) {
         <div className="absolute inset-0">
           <Image
             src={item.afterImg}
-            alt={`${item.name} - بعد`}
+            alt={`${item.name} - ${t.after}`}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 768px) 85vw, 420px"
             className="object-cover object-center"
           />
         </div>
@@ -59,9 +70,9 @@ export default function BeforeAfterSlider({ item }) {
         >
           <Image
             src={item.beforeImg}
-            alt={`${item.name} - قبل`}
+            alt={`${item.name} - ${t.before}`}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 768px) 85vw, 420px"
             className="object-cover object-center"
           />
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px]" />
@@ -72,7 +83,6 @@ export default function BeforeAfterSlider({ item }) {
           className="pointer-events-none absolute top-0 bottom-0 w-[2px] bg-fitness-primary shadow-[0_0_15px_rgba(34,197,94,1),0_0_30px_rgba(34,197,94,0.6)]"
           style={{ right: `${offsetPercent}%` }}
         >
-          {/* هندل اسلایدر */}
           <div className="absolute top-1/2 -right-4 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border-2 border-black bg-fitness-primary shadow-[0_0_18px_rgba(34,197,94,0.9)]">
             <svg
               className="h-3.5 w-3.5 text-black"
@@ -92,13 +102,13 @@ export default function BeforeAfterSlider({ item }) {
 
         {/* برچسب‌های شیشه‌ای */}
         <span className="pointer-events-none absolute top-3.5 right-3.5 rounded-xl border border-white/10 bg-black/65 px-3 py-1 text-[11px] font-black text-white shadow-lg backdrop-blur-md">
-          بعد
+          {t.after}
         </span>
         <span className="pointer-events-none absolute top-3.5 left-3.5 rounded-xl border border-fitness-primary/40 bg-fitness-primary/85 px-3 py-1 text-[11px] font-black text-black shadow-[0_0_15px_rgba(34,197,94,0.4)] backdrop-blur-md">
-          قبل
+          {t.before}
         </span>
 
-        {/* ورودی لمسی */}
+        {/* ورودی کنترل اسلایدر */}
         <input
           type="range"
           min="0"
@@ -110,17 +120,17 @@ export default function BeforeAfterSlider({ item }) {
           onTouchStart={() => setIsInteracting(true)}
           onTouchEnd={() => setIsInteracting(false)}
           className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0 touch-pan-y"
-          aria-label="مؤشر مقارنة قبل وبعد"
+          aria-label={t.ariaLabel}
         />
 
         {/* راهنمای لمس */}
-        <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/50 px-3 py-0.5 text-[10px] text-zinc-300 backdrop-blur-md">
-          اسحب المؤشر للمقارنة
+        <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/50 px-3 py-0.5 text-[10px] text-zinc-300 backdrop-blur-md whitespace-nowrap">
+          {t.hint}
         </div>
       </div>
 
       {/* جزئیات تحول شاگرد */}
-      <div className="mt-4 px-1.5">
+      <div className="mt-4 px-1.5 text-start">
         <div className="flex items-center justify-between">
           <span className="text-base font-black tracking-tight text-white">
             {item.name}

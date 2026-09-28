@@ -4,6 +4,7 @@ import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float } from "@react-three/drei";
 import * as THREE from "three";
+import { HERO_CONTENT } from "@/constants/fitnessData";
 
 // متریال‌های متالیک روشن با رفلکس بالا
 const brightMetalMat = new THREE.MeshStandardMaterial({
@@ -161,11 +162,10 @@ function AmbientEnergyDust({ count = 35 }) {
   );
 }
 
-// 🚀 کامپوننت کلیدی: محاسبه دقیق موقعیت المان‌ها متناسب با عرض واقعی نمایشگر
+// محاسبه دقیق موقعیت المان‌ها متناسب با عرض واقعی نمایشگر
 function ResponsiveElements() {
   const { viewport } = useThree();
 
-  // تشخیص موبایل بر اساس عرض دید دوربین در Three.js
   const isMobile = viewport.width < 5.5;
 
   const platePos = isMobile
@@ -257,7 +257,9 @@ function SceneCanvas() {
   );
 }
 
-export default function HeroSection() {
+export default function HeroSection({ lang = "ar" }) {
+  const content = HERO_CONTENT[lang] || HERO_CONTENT.ar;
+
   return (
     <section className="relative min-h-[90vh] w-full overflow-hidden border-b border-zinc-800 bg-[#0c1012] flex items-center justify-center">
       {/* کانوِس ۳ بعدی تمام‌عرض */}
@@ -276,21 +278,19 @@ export default function HeroSection() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-fitness-primary" />
           </span>
           <span className="font-mono text-xs font-bold text-fitness-primary">
-            HYPERTROPHY &amp; FAT LOSS PROTOCOL
+            {content.badge}
           </span>
         </div>
 
         <h1 className="text-3xl font-black leading-[1.25] tracking-tight text-white sm:text-5xl lg:text-6xl drop-shadow-[0_4px_15px_rgba(0,0,0,0.8)]">
-          هندسة دقيقة للبناء العضلي؛ <br />
+          {content.headlinePrimary} <br />
           <span className="mt-2 inline-block bg-gradient-to-r from-fitness-primary via-emerald-300 to-white bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(34,197,94,0.5)]">
-            أبعد من مجرد تدريب تقليدي
+            {content.headlineHighlight}
           </span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-zinc-200 sm:text-base drop-shadow-md">
-          برامج تدريبية وتغذوية مبنية على القياسات الحيوية الفريدة لجسمك
-          والتمثيل الغذائي. انطلق نحو خسارة الدهون وبناء كتلة عضلية صافية وفق
-          أحدث الأسس العلمية، دون حرمان أو إهدار للوقت.
+          {content.description}
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row">
@@ -298,43 +298,35 @@ export default function HeroSection() {
             href="#booking"
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fitness-primary px-8 py-4 text-center font-black text-black shadow-[0_0_35px_rgba(34,197,94,0.5)] transition-all hover:bg-fitness-primary-hover active:scale-[0.98] sm:w-auto"
           >
-            <span>ابدأ الاستشارة واحصل على خطتك</span>
-            <span className="text-sm rtl:rotate-180">←</span>
+            <span>{content.ctaPrimary}</span>
+            <span className="text-sm transition-transform duration-200 rtl:rotate-180">
+              →
+            </span>
           </a>
 
           <a
             href="#calculator"
             className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-zinc-700 bg-zinc-950/90 px-6 py-4 text-center text-xs font-bold text-zinc-100 shadow-md backdrop-blur-md transition-all hover:border-fitness-primary hover:text-white sm:w-auto"
           >
-            <span>حساب السعرات واحتياج الـ TDEE فوراً</span>
+            <span>{content.ctaSecondary}</span>
           </a>
         </div>
 
         <div className="mx-auto mt-12 grid max-w-lg grid-cols-3 gap-4 border-t border-zinc-800/80 pt-6">
-          <div>
-            <p className="font-mono text-2xl font-black text-white sm:text-3xl">
-              +450
-            </p>
-            <span className="text-[11px] font-medium text-zinc-400">
-              تحول بدني ناجح
-            </span>
-          </div>
-          <div>
-            <p className="font-mono text-2xl font-black text-fitness-primary sm:text-3xl">
-              98٪
-            </p>
-            <span className="text-[11px] font-medium text-zinc-400">
-              نسبة رضا المشتركين
-            </span>
-          </div>
-          <div>
-            <p className="font-mono text-2xl font-black text-white sm:text-3xl">
-              8 سنوات
-            </p>
-            <span className="text-[11px] font-medium text-zinc-400">
-              خبرة تدريبية تخصصية
-            </span>
-          </div>
+          {content.stats.map((stat, idx) => (
+            <div key={idx}>
+              <p
+                className={`font-mono text-2xl font-black sm:text-3xl ${
+                  idx === 1 ? "text-fitness-primary" : "text-white"
+                }`}
+              >
+                {stat.value}
+              </p>
+              <span className="text-[11px] font-medium text-zinc-400">
+                {stat.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

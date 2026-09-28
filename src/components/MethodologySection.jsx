@@ -1,27 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-
-const DEFAULT_SERVICES = [
-  {
-    id: "vip",
-    badge: "الأكثر طلباً",
-    title: "التدريب الشخصي الشامل VIP",
-    desc: "تصميم دقيق لبرامج التمرين والتغذية مع متابعة وتحليل أسبوعي، تصحيح أداء التمارين وتواصل مباشر 24/7.",
-  },
-  {
-    id: "cut",
-    badge: "برنامج تخصصي",
-    title: "برنامج التنشيف وحرق الدهون العلمي",
-    desc: "خسارة قصوى لنسبة الدهون بالجسم مع الحفاظ التام على الكتلة العضلية بدون حميات قاسية أو حرمان غير منطقي.",
-  },
-  {
-    id: "bulk",
-    badge: "نتائج مضمونة",
-    title: "برنامج التضخيم والبناء العضلي",
-    desc: "أنظمة تدريبية مبنية على الزيادة التدريجية للأحمال تتوافق مع جيناتك وطبيعة جسمك الفريدة لتحقيق أقصى ضخامة.",
-  },
-];
+import { SERVICES, PAGE_CONTENT } from "@/constants/fitnessData";
 
 function ServiceIcon({ id }) {
   if (id === "vip" || id === 1) {
@@ -91,13 +71,17 @@ function ServiceIcon({ id }) {
   );
 }
 
-export default function MethodologySection({ services = DEFAULT_SERVICES }) {
+export default function MethodologySection({ services, lang = "ar" }) {
+  const currentServices = services || SERVICES[lang] || SERVICES.ar;
+  const t = PAGE_CONTENT[lang]?.methodology || PAGE_CONTENT.ar.methodology;
+  const isRtl = lang === "ar";
+
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   const goToNextCard = () => {
-    setActiveIndex((prev) => (prev + 1) % services.length);
+    setActiveIndex((prev) => (prev + 1) % currentServices.length);
   };
 
   const handleTouchStart = (e) => {
@@ -118,24 +102,23 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
 
   return (
     <section className="relative w-full py-12 md:py-24 overflow-hidden">
-      {/* نور پس‌زمینه لطیف */}
+      {/* هاله نور پس‌زمینه */}
       <div className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fitness-primary/10 blur-[120px]" />
 
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-8 text-center md:mb-12">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-2.5">
-            مسار تدريبي قائم على النتائج
+            {t.badge}
           </span>
           <h2 className="text-2xl font-black tracking-tight md:text-4xl text-white">
-            المنهجية والبرامج التدريبية
+            {t.title}
           </h2>
           <p className="mt-1.5 text-xs text-fitness-muted md:text-sm">
-            مصممة وفق أحدث معايير الميكانيكا الحيوية وفرط النمو العضلي
-            (Hypertrophy)
+            {t.subtitle}
           </p>
         </div>
 
-        {/* ۱. نمای موبایل: ۳D Coverflow */}
+        {/* ۱. نمای موبایل: ۳D Coverflow با تنظیم دقیق جهت */}
         <div
           className="relative block md:hidden w-full select-none cursor-pointer"
           onTouchStart={handleTouchStart}
@@ -147,8 +130,8 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
             className="relative mx-auto h-[240px] w-full max-w-[320px]"
             style={{ perspective: "900px" }}
           >
-            {services.map((s, index) => {
-              const count = services.length;
+            {currentServices.map((s, index) => {
+              const count = currentServices.length;
               let diff = (index - activeIndex) % count;
               if (diff < -Math.floor(count / 2)) diff += count;
               if (diff > Math.floor(count / 2)) diff -= count;
@@ -156,6 +139,7 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
               const isActive = diff === 0;
               const isVIP =
                 s.badge?.includes("الأكثر طلباً") ||
+                s.badge?.includes("Most Popular") ||
                 s.id === "vip" ||
                 index === 0;
 
@@ -163,19 +147,26 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
               let zIndex = 10 - Math.abs(diff);
               let opacity = 1;
 
+              // معکوس کردن زاویه برای LTR و RTL
+              const dirFactor = isRtl ? 1 : -1;
+
               if (isActive) {
                 transformStyle =
                   "translateZ(35px) translateX(0px) rotateY(0deg) scale(1)";
               } else if (diff === 1) {
-                transformStyle =
-                  "translateZ(-60px) translateX(-45px) rotateY(14deg) scale(0.92)";
+                transformStyle = `translateZ(-60px) translateX(${
+                  -45 * dirFactor
+                }px) rotateY(${14 * dirFactor}deg) scale(0.92)`;
                 opacity = 0.55;
               } else if (diff === -1) {
-                transformStyle =
-                  "translateZ(-60px) translateX(45px) rotateY(-14deg) scale(0.92)";
+                transformStyle = `translateZ(-60px) translateX(${
+                  45 * dirFactor
+                }px) rotateY(${-14 * dirFactor}deg) scale(0.92)`;
                 opacity = 0.55;
               } else {
-                transformStyle = `translateZ(-120px) translateX(${diff * 60}px) scale(0.8)`;
+                transformStyle = `translateZ(-120px) translateX(${
+                  diff * 60 * dirFactor
+                }px) scale(0.8)`;
                 opacity = 0;
               }
 
@@ -188,7 +179,7 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
                     opacity,
                     transition: "all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)",
                   }}
-                  className={`absolute inset-0 flex flex-col justify-between rounded-2xl border p-5 backdrop-blur-xl ${
+                  className={`absolute inset-0 flex flex-col justify-between rounded-2xl border p-5 backdrop-blur-xl text-start ${
                     isVIP
                       ? "border-fitness-primary/50 bg-gradient-to-b from-fitness-surface to-black shadow-[0_8px_30px_rgba(34,197,94,0.16)]"
                       : "border-fitness-border bg-fitness-surface shadow-lg"
@@ -217,8 +208,10 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-fitness-border/40 pt-2.5 text-[11px] font-semibold text-fitness-primary">
-                    <span>اختر الخطة واحصل على برنامجك</span>
-                    <span className="text-xs rtl:rotate-180">←</span>
+                    <span>{t.mobileCardCta}</span>
+                    <span className="text-xs transition-transform rtl:rotate-180">
+                      →
+                    </span>
                   </div>
                 </div>
               );
@@ -227,7 +220,7 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
 
           {/* نشانگر نقطه‌ای */}
           <div className="mt-4 flex justify-center items-center gap-1.5">
-            {services.map((_, idx) => (
+            {currentServices.map((_, idx) => (
               <button
                 key={idx}
                 type="button"
@@ -240,27 +233,29 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
                     ? "w-6 bg-fitness-primary shadow-[0_0_8px_rgba(34,197,94,0.6)]"
                     : "w-1.5 bg-fitness-border"
                 }`}
-                aria-label={`البرنامج ${idx + 1}`}
+                aria-label={`${t.cardAria} ${idx + 1}`}
               />
             ))}
           </div>
 
           <p className="mt-2 text-center text-[10px] text-fitness-muted/70">
-            اسحب لليمين أو اليسار للتنقل بين البرامج التدريبية
+            {t.swipeHint}
           </p>
         </div>
 
         {/* ۲. نمای دسکتاپ */}
         <div className="hidden md:grid md:grid-cols-3 gap-6">
-          {services.map((s, index) => {
+          {currentServices.map((s, index) => {
             const isVIP =
               s.badge?.includes("الأكثر طلباً") ||
+              s.badge?.includes("Most Popular") ||
               s.id === "vip" ||
               index === 0;
+
             return (
               <div
                 key={s.id || index}
-                className={`group relative flex flex-col justify-between rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1.5 ${
+                className={`group relative flex flex-col justify-between rounded-3xl border p-6 transition-all duration-300 hover:-translate-y-1.5 text-start ${
                   isVIP
                     ? "border-fitness-primary/50 bg-gradient-to-b from-fitness-surface to-black shadow-[0_10px_35px_rgba(34,197,94,0.12)] hover:border-fitness-primary"
                     : "border-fitness-border bg-fitness-surface hover:border-fitness-border/90"
@@ -289,9 +284,9 @@ export default function MethodologySection({ services = DEFAULT_SERVICES }) {
                 </div>
 
                 <div className="mt-6 flex items-center gap-2 border-t border-fitness-border/50 pt-4 text-xs font-semibold text-fitness-text/80 group-hover:text-fitness-primary transition-colors">
-                  <span>عرض تفاصيل البرنامج</span>
-                  <span className="transition-transform group-hover:-translate-x-1 rtl:rotate-180">
-                    ←
+                  <span>{t.desktopCardCta}</span>
+                  <span className="transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180">
+                    →
                   </span>
                 </div>
               </div>

@@ -1,24 +1,32 @@
 "use client";
 
 import React, { useState } from "react";
+import { FAQS } from "@/constants/fitnessData";
 
-const DEFAULT_ARABIC_FAQS = [
-  {
-    question: "هل أحتاج بالضرورة إلى الاشتراك في نادٍ رياضي متكامل؟",
-    answer:
-      "لا، يتم تفصيل الخطة التدريبية بالكامل حسب الأدوات المتاحة لديك؛ سواء كان تدريباً في الجيم، أو هوم جيم منزلي، أو تمارين بوزن الجسم وأحبال المقاومة.",
+const FAQ_UI_TEXT = {
+  ar: {
+    badge: "وضوح تام قبل الاشتراك",
+    title: "الأسئلة الشائعة",
+    subtitle:
+      "إجابات وافية على أكثر استفسارات المشتركين تكراراً قبل بدء البرنامج",
+    askMoreTitle: "لديك سؤال آخر لم تجد إجابته هنا؟",
+    askMoreDesc: "يمكنك التواصل مباشرة مع المدرب للإجابة على جميع استفساراتك.",
+    whatsappBtn: "تحدث مع المدرب عبر واتساب",
+    whatsappMessage: "مرحباً كابتن، لدي استفسار بخصوص برامج التدريب.",
   },
-  {
-    question: "كيف تتم المتابعة والتواصل مع المدرب بعد الاشتراك؟",
-    answer:
-      "مباشرة بعد التسجيل، يتم فتح قناة تواصل مباشرة وخاصة عبر واتساب لإرسال الجداول، واستلام التقارير الدورية وتحليل التطور أسبوعياً.",
+  en: {
+    badge: "Full Transparency Before You Join",
+    title: "Frequently Asked Questions",
+    subtitle:
+      "Clear answers to the most common questions before starting your journey",
+    askMoreTitle: "Have another question not listed here?",
+    askMoreDesc:
+      "Reach out directly to the coach for quick answers to your questions.",
+    whatsappBtn: "Chat with Coach on WhatsApp",
+    whatsappMessage:
+      "Hello Coach, I have an inquiry regarding your training programs.",
   },
-  {
-    question: "هل يتضمن النظام الغذائي أطعمة معقدة أو مكلفة؟",
-    answer:
-      "إطلاقاً. تعتمد جميع الأنظمة على خيارات غذائية طبيعية وسهلة الإعداد مع حساب دقيق للسعرات والماكروز بما يتوافق مع ميزانيتك وتفضيلاتك اليومية.",
-  },
-];
+};
 
 function PlusIcon({ className = "h-4 w-4" }) {
   return (
@@ -40,13 +48,15 @@ function PlusIcon({ className = "h-4 w-4" }) {
 
 export default function FaqSection({
   faqs,
+  lang = "ar",
   coachWhatsapp = process.env.NEXT_PUBLIC_COACH_WHATSAPP_PHONE ||
     "971500000000",
 }) {
-  const activeFaqs =
-    faqs && faqs.length > 0 && !faqs[0]?.question?.includes("آیا")
-      ? faqs
-      : DEFAULT_ARABIC_FAQS;
+  const isRtl = lang === "ar";
+  const ui = FAQ_UI_TEXT[lang] || FAQ_UI_TEXT.ar;
+
+  // اگر faqs به عنوان prop پاس داده نشد، از دیکشنری مرکزی خوانده شود
+  const activeFaqs = faqs && faqs.length > 0 ? faqs : FAQS[lang] || FAQS.ar;
 
   const [openIndex, setOpenIndex] = useState(null);
 
@@ -54,26 +64,30 @@ export default function FaqSection({
     setOpenIndex((prev) => (prev === idx ? null : idx));
   };
 
-  const whatsappDirectUrl = `https://wa.me/${coachWhatsapp.replace(/\+/g, "")}?text=${encodeURIComponent("مرحباً كابتن، لدي استفسار بخصوص برامج التدريب.")}`;
+  const whatsappDirectUrl = `https://wa.me/${coachWhatsapp.replace(
+    /\+/g,
+    "",
+  )}?text=${encodeURIComponent(ui.whatsappMessage)}`;
 
   return (
     <section className="relative w-full border-t border-fitness-border py-16 md:py-24 overflow-hidden">
       <div className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fitness-primary/5 blur-[140px]" />
 
       <div className="mx-auto max-w-3xl px-6">
+        {/* هدر بخش */}
         <div className="mb-12 text-center">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-3.5 py-1 text-xs font-bold text-fitness-primary mb-3">
-            وضوح تام قبل الاشتراك
+            {ui.badge}
           </span>
           <h2 className="text-2xl font-black tracking-tight text-white md:text-4xl">
-            الأسئلة الشائعة
+            {ui.title}
           </h2>
           <p className="mt-2 text-xs text-fitness-muted md:text-sm">
-            إجابات وافية على أكثر استفسارات المشتركين تكراراً قبل بدء البرنامج
+            {ui.subtitle}
           </p>
         </div>
 
-        {/* لیست آکاردئونی */}
+        {/* لیست آکاردئونی سوالات */}
         <div className="space-y-4">
           {activeFaqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
@@ -98,7 +112,7 @@ export default function FaqSection({
                 <button
                   type="button"
                   onClick={() => toggleFaq(idx)}
-                  className="flex w-full cursor-pointer select-none items-center justify-between gap-4 text-right"
+                  className="flex w-full cursor-pointer select-none items-center justify-between gap-4 text-start"
                   aria-expanded={isOpen}
                 >
                   <div className="flex items-center gap-3.5">
@@ -149,15 +163,11 @@ export default function FaqSection({
           })}
         </div>
 
-        {/* کارت ارتباط مستقیم */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 text-center sm:flex-row sm:text-right">
+        {/* کارت ارتباط مستقیم واتساپ */}
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 text-center sm:flex-row sm:text-start">
           <div>
-            <p className="text-xs font-bold text-zinc-200">
-              لديك سؤال آخر لم تجد إجابته هنا؟
-            </p>
-            <p className="mt-0.5 text-[11px] text-zinc-500">
-              يمكنك التواصل مباشرة مع المدرب للإجابة على جميع استفساراتك.
-            </p>
+            <p className="text-xs font-bold text-zinc-200">{ui.askMoreTitle}</p>
+            <p className="mt-0.5 text-[11px] text-zinc-500">{ui.askMoreDesc}</p>
           </div>
           <a
             href={whatsappDirectUrl}
@@ -165,8 +175,12 @@ export default function FaqSection({
             rel="noopener noreferrer"
             className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-fitness-primary/40 bg-fitness-primary/10 px-4 py-2 text-xs font-bold text-fitness-primary transition-colors hover:bg-fitness-primary hover:text-black"
           >
-            <span>تحدث مع المدرب عبر واتساب</span>
-            <span className="text-sm rtl:rotate-180">←</span>
+            <span>{ui.whatsappBtn}</span>
+            <span
+              className={`text-sm transition-transform duration-200 ${isRtl ? "rotate-180" : ""}`}
+            >
+              →
+            </span>
           </a>
         </div>
       </div>

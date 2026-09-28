@@ -3,7 +3,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// تابع کمکی تولید کد پرونده اختصاصی (بدون وابستگی خارجی)
+// تابع کمکی تولید کد پرونده اختصاصی
 function generateFileId() {
   const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
   const timePart = Date.now().toString().slice(-3);
@@ -17,77 +17,117 @@ export async function POST(req) {
       name,
       phone,
       goal,
+      goalKey,
       experience,
       notes,
       calculatedStats,
       selectedPlan,
       planDuration,
+      locale = "ar",
     } = body;
 
-    // ایجاد کد پرونده اختصاصی برای این شاگرد
     const fileId = generateFileId();
+    const isEn = locale === "en";
 
-    const chosenPlanTitle = selectedPlan || "باقة غير محددة";
+    const chosenPlanTitle =
+      selectedPlan || (isEn ? "Unspecified Plan" : "باقة غير محددة");
     const chosenPlanDuration = planDuration ? ` (${planDuration})` : "";
 
     const coachEmail = process.env.COACH_EMAIL;
     const coachPhone = process.env.COACH_WHATSAPP_PHONE || "971500000000";
 
-    // استخراج دقیق داده‌های بیومتریک و محاسبات از calculatedStats
+    // استخراج دقیق داده‌های بیومتریک و نقشه راه ۱۲ هفته‌ای
     const hasBiometrics = !!calculatedStats;
     const weight = calculatedStats?.weight || "-";
     const height = calculatedStats?.height || "-";
     const age = calculatedStats?.age || "-";
     const gender =
-      calculatedStats?.gender === "female" ? "أنثى (Female)" : "ذكر (Male)";
+      calculatedStats?.gender === "female"
+        ? isEn
+          ? "Female"
+          : "أنثى (Female)"
+        : isEn
+          ? "Male"
+          : "ذكر (Male)";
 
     const targetCalories =
       calculatedStats?.result?.targetCalories ||
       calculatedStats?.result?.calories ||
       calculatedStats?.result?.tdee ||
-      "غير محدد";
+      (isEn ? "Not specified" : "غير محدد");
 
     const bmr = calculatedStats?.result?.bmr || "-";
     const tdee = calculatedStats?.result?.tdee || "-";
 
-    // محاسبه یا دریافت ماکروها (در صورت وجود عدد کالری)
+    // داده‌های فیزیولوژیک جدید: ۱۲ هفته، تغذیه و مکمل
+    const target12Weeks =
+      calculatedStats?.result?.projection?.estimatedWeight || "-";
+    const expectedDelta =
+      calculatedStats?.result?.projection?.expectedDelta || "-";
+    const composition = calculatedStats?.result?.projection?.composition || "-";
+
+    const nutritionType =
+      calculatedStats?.nutrition === "coached"
+        ? isEn
+          ? "Precision Macro Plan (Coached)"
+          : "خطة مخصصة ومحسوبة الغرامات"
+        : isEn
+          ? "Standard Home Cooking"
+          : "أكل منزلي عام";
+
+    const supplementsType =
+      calculatedStats?.supplements === "essential"
+        ? isEn
+          ? "Performance Stack (Whey + Creatine + Omega 3)"
+          : "مكملات أساسية (واي + كرياتين + أوميغا 3)"
+        : isEn
+          ? "Natural Whole Foods Only"
+          : "أغذية طبيعية فقط بدون مكملات";
+
+    // محاسبه تفکیک ماکروها
     const calNumber = Number(targetCalories);
     const protein = !isNaN(calNumber) ? Math.round((calNumber * 0.3) / 4) : "-";
     const carbs = !isNaN(calNumber) ? Math.round((calNumber * 0.45) / 4) : "-";
     const fats = !isNaN(calNumber) ? Math.round((calNumber * 0.25) / 9) : "-";
 
-    // تمیز کردن شماره شاگرد برای ایجاد لینک مستقیم چت واتس‌اپ
     const cleanUserPhone = phone ? phone.replace(/[^0-9]/g, "") : "";
 
-    // متن پیش‌فرضی که در چت واتس‌اپ مربی با شاگرد باز می‌شود
-    const whatsappGreeting = `مرحباً ${name}، استلمت تفاصيل تسجيلك في البرنامج التدريبي عبر الموقع:
+    // متن پیش‌فرض چت واتس‌اپ مربی با شاگرد (متناسب با زبان شاگرد)
+    const whatsappGreeting = isEn
+      ? `Hello ${name}, I have received your registration details through the website:
+- File ID: #${fileId}
+- Selected Tier: ${chosenPlanTitle}${chosenPlanDuration}
+- Primary Goal: ${goal}
+${hasBiometrics ? `- Current Weight: ${weight} kg \vert{} Height:${height} cm\n- 12-Wk Target: ${target12Weeks} (${expectedDelta})\n- Target Intake: ${targetCalories} kcal\n- Supplement Plan:${supplementsType}` : ""}
+Are you ready to initiate your customized onboarding assessment?`
+      : `مرحباً ${name}، استلمت تفاصيل تسجيلك في البرنامج التدريبي عبر الموقع:
 - رقم الملف: #${fileId}
 - الباقة المختارة: ${chosenPlanTitle}${chosenPlanDuration}
 - الهدف: ${goal}
-${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم | السعرات: ${targetCalories} kcal` : ""}
-جاهز نبدأ خطتك التدريبية؟`;
+${hasBiometrics ? `- الوزن الحالي: ${weight} كجم \vert{} الطول: ${height} سم\n- الهدف بعد 12 أسبوعاً: ${target12Weeks} (${expectedDelta})\n- السعرات المستهدفة: ${targetCalories} kcal\n- بروتوكول المكملات: ${supplementsType}` : ""}
+جاهز نبدأ خطتك التدريبية والتحليل الشامل؟`;
 
     const waDirectUrl = `https://wa.me/${cleanUserPhone}?text=${encodeURIComponent(
       whatsappGreeting,
     )}`;
 
-    // ساخت قالب شیک و تفکیک‌شده ایمیل با گزارش کامل بیومتریک و پلن انتخابی
+    // قالب مدرن، جذاب و واکنش‌گرای ایمیل گزارش برای مربی
     const emailHtml = `
-      <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0c1012; color: #f4f4f5; padding: 25px; border-radius: 18px; max-width: 600px; margin: 0 auto; border: 1px solid #27272a;">
+      <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0c1012; color: #f4f4f5; padding: 25px; border-radius: 18px; max-width: 620px; margin: 0 auto; border: 1px solid #27272a;">
         
         <!-- هدر ایمیل -->
         <div style="text-align: center; margin-bottom: 24px;">
           <span style="background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.4); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;">
-            🔔 اشتراك جديد في الموقع
+            🔔 مشترك جديد (${isEn ? "English" : "العربية"})
           </span>
-          <h2 style="color: #ffffff; margin: 12px 0 4px 0; font-size: 22px;">طلب خطة تدريبية جديدة</h2>
-          <div style="display: inline-block; margin-top: 6px; background-color: #1f2937; color: #38bdf8; padding: 3px 10px; border-radius: 6px; font-family: monospace; font-size: 13px; font-weight: bold;">
+          <h2 style="color: #ffffff; margin: 12px 0 4px 0; font-size: 22px;">طلب خطة تدريبية ومسار تحول جديد</h2>
+          <div style="display: inline-block; margin-top: 6px; background-color: #1f2937; color: #38bdf8; padding: 4px 12px; border-radius: 6px; font-family: monospace; font-size: 13px; font-weight: bold;">
             رقم الملف: #${fileId}
           </div>
-          <p style="color: #a1a1aa; font-size: 13px; margin: 8px 0 0 0;">تفاصيل المشترك وتحليلات الفحص الحيوي (Bio-Scanner)</p>
+          <p style="color: #a1a1aa; font-size: 13px; margin: 8px 0 0 0;">تفاصيل المشترك وتحليلات الفحص الحيوي (INBODY BIO-SCANNER 4.0)</p>
         </div>
 
-        <!-- کارت اطلاعات فردی، دوره انتخابی و تماس -->
+        <!-- کارت ۱: اطلاعات فردی و دوره انتخابی -->
         <div style="background-color: #141418; padding: 18px; border-radius: 14px; border: 1px solid #282832; margin-bottom: 16px;">
           <h3 style="color: #22c55e; margin: 0 0 12px 0; font-size: 14px; border-bottom: 1px solid #27272a; padding-bottom: 8px;">
             👤 البيانات الشخصية والتواصل
@@ -120,24 +160,23 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
           </table>
         </div>
 
-        <!-- کارت نتایج آنالیز ماشین حساب بیومتریک -->
+        <!-- کارت ۲: آنالیز بیومتریک و نقشه راه ۱۲ هفته‌ای -->
         <div style="background-color: #141418; padding: 18px; border-radius: 14px; border: 1px solid #282832; margin-bottom: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; padding-bottom: 8px; margin-bottom: 12px;">
             <h3 style="color: #22c55e; margin: 0; font-size: 14px;">
-              📊 نتائج الفحص الحيوي (INBODY BIO-SCANNER)
+              📊 نتائج الفحص الحيوي وخارطة التحول المتوقعة
             </h3>
             <span style="font-size: 11px; color: ${hasBiometrics ? "#22c55e" : "#ef4444"}; font-weight: bold;">
-              ${hasBiometrics ? "● تم إرفاق الفحص" : "○ لم يستخدم الحاسبة"}
+              ${hasBiometrics ? "● تم إرفاق الفحص والمحاكاة" : "○ لم يستخدم الحاسبة"}
             </span>
           </div>
 
           ${
             hasBiometrics
               ? `
-              <!-- مشخصات فیزیکی شاگرد -->
               <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 12px;">
                 <tr>
-                  <td style="padding: 5px 0; color: #a1a1aa; width: 25%;">الوزن:</td>
+                  <td style="padding: 5px 0; color: #a1a1aa; width: 25%;">الوزن الحالي:</td>
                   <td style="padding: 5px 0; color: #ffffff; font-weight: bold;">${weight} كجم</td>
                   <td style="padding: 5px 0; color: #a1a1aa; width: 25%;">الطول:</td>
                   <td style="padding: 5px 0; color: #ffffff; font-weight: bold;">${height} سم</td>
@@ -156,8 +195,24 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
                 </tr>
               </table>
 
-              <!-- تارگت کالری و تقسیم ماکروها -->
-              <div style="background-color: #0c1012; border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 12px; text-align: center; margin-top: 10px;">
+              <!-- نقشه راه ۱۲ هفته‌ای و مکمل‌ها -->
+              <div style="background-color: #0c1012; border: 1px solid rgba(56,189,248,0.3); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+                <span style="color: #38bdf8; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px;">🎯 الهدف التقديري بعد 12 أسبوعاً:</span>
+                <div style="font-size: 14px; color: #ffffff; font-weight: bold;">
+                  الوزن المتوقع: <span style="color: #22c55e; font-family: monospace;">${target12Weeks}</span> 
+                  <span style="color: #a1a1aa; font-size: 12px;">(${expectedDelta})</span>
+                </div>
+                <div style="font-size: 11px; color: #d4d4d8; margin-top: 4px;">
+                  طبيعة التغير: ${composition}
+                </div>
+                <div style="margin-top: 8px; font-size: 12px; border-top: 1px dashed #27272a; padding-top: 6px;">
+                  <div><span style="color: #a1a1aa;">منهجية التغذية:</span> <strong style="color: #ffffff;">${nutritionType}</strong></div>
+                  <div style="margin-top: 3px;"><span style="color: #a1a1aa;">المكملات المطلوبة:</span> <strong style="color: #38bdf8;">${supplementsType}</strong></div>
+                </div>
+              </div>
+
+              <!-- تارگت کالری و ماکروها -->
+              <div style="background-color: #0c1012; border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 12px; text-align: center;">
                 <span style="color: #a1a1aa; font-size: 11px; display: block;">الهدف اليومي الموصى به من السعرات</span>
                 <span style="color: #22c55e; font-size: 24px; font-weight: 900; font-family: monospace; display: block; margin: 4px 0;">
                   ${targetCalories} <span style="font-size: 13px;">KCAL</span>
@@ -187,7 +242,7 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
           }
         </div>
 
-        <!-- بخش توضیحات و آسیب‌دیدگی -->
+        <!-- کارت توضیحات یا آسیب‌دیدگی -->
         ${
           notes
             ? `
@@ -199,7 +254,7 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
             : ""
         }
 
-        <!-- دکمه CTA شروع چت در واتس‌اپ با شاگرد -->
+        <!-- دکمه اقدام سریع واتساپ برای مربی -->
         <div style="text-align: center; margin-top: 25px;">
           <a href="${waDirectUrl}" style="background-color: #22c55e; color: #000000; padding: 14px 28px; text-decoration: none; border-radius: 14px; font-weight: 900; font-size: 14px; display: inline-block; box-shadow: 0 4px 20px rgba(34,197,94,0.35);">
             💬 فتح محادثة واتساب فورية مع المشترك
@@ -207,12 +262,12 @@ ${hasBiometrics ? `- الوزن: ${weight} كجم | الطول: ${height} سم |
         </div>
 
         <p style="text-align: center; color: #52525b; font-size: 11px; margin-top: 25px; border-top: 1px solid #1f1f23; padding-top: 12px;">
-          تم استلام هذه البيانات وتوليدها تلقائياً عبر منصة اللاندينج الخاصة بك.
+          تم استلام هذه البيانات وتوليدها تلقائياً عبر منصة التدريب الشخصي الخاصة بك.
         </p>
       </div>
     `;
 
-    // ارسال ایمیل با موضوع شامل کد پرونده، نام، پلن و هدف
+    // ارسال ایمیل از طریق Resend
     if (process.env.RESEND_API_KEY && coachEmail) {
       await resend.emails.send({
         from: "Fitness Lead <onboarding@resend.dev>",

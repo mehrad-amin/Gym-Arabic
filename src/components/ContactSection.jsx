@@ -3,6 +3,57 @@
 import React, { useRef, useState } from "react";
 import { CONTACT_INFO } from "@/constants/fitnessData";
 
+const CONTACT_UI_TEXT = {
+  ar: {
+    badge: "قنوات التواصل المباشر",
+    title: "معلومات التواصل ومقر التدريب",
+    subtitle:
+      "للاستشارات الخاصة، فحص البنية العضلية وحجز جلسات التدريب المباشر",
+    card1: {
+      title: "الاتصال والاستشارة الهاتفية",
+      desc: "للإجابة على الاستفسارات قبل الاشتراك وحجز مواعيد التدريب الخاص:",
+      hoursLabel: "ساعات الاستجابة ومواعيد التدريب:",
+    },
+    card2: {
+      title: "المحادثة وقنوات التواصل",
+      desc: "متابعة التطور اليومي، شروحات التكنيك والتواصل الفوري المباشر:",
+      whatsappTitle: "محادثة واتساب المباشرة",
+      instagramTitle: "حساب إنستغرام الرسمي",
+      note: "استجابة سريعة عبر واتساب وإنستغرام خلال ساعات العمل",
+    },
+    card3: {
+      status: "الموقع متاح ومفعّل",
+      title: "مقر التدريب والصالة الرياضية",
+      googleMaps: "Google Maps",
+      appleMaps: "Apple Maps",
+    },
+  },
+  en: {
+    badge: "Direct Contact Channels",
+    title: "Get in Touch & Training Facility",
+    subtitle:
+      "For private consultations, biomechanical assessment, and VIP coaching sessions",
+    card1: {
+      title: "Phone & Direct Consultation",
+      desc: "For pre-onboarding inquiries and private coaching reservations:",
+      hoursLabel: "Operating Hours & Training Schedule:",
+    },
+    card2: {
+      title: "Chat & Social Channels",
+      desc: "Daily training logs, technique breakdowns, and immediate direct support:",
+      whatsappTitle: "Direct WhatsApp Chat",
+      instagramTitle: "Official Instagram Profile",
+      note: "Prompt response via WhatsApp & Instagram during business hours",
+    },
+    card3: {
+      status: "Location Active & Available",
+      title: "Training Facility & Gym Location",
+      googleMaps: "Google Maps",
+      appleMaps: "Apple Maps",
+    },
+  },
+};
+
 function PhoneIcon() {
   return (
     <svg
@@ -146,14 +197,26 @@ function Contact3DCard({ children, className = "" }) {
   );
 }
 
-export default function ContactSection() {
+export default function ContactSection({ lang = "ar" }) {
+  const ui = CONTACT_UI_TEXT[lang] || CONTACT_UI_TEXT.ar;
+
+  const currentAddress =
+    typeof CONTACT_INFO.address === "object"
+      ? CONTACT_INFO.address[lang] || CONTACT_INFO.address.ar
+      : CONTACT_INFO.address;
+
+  const currentWorkingHours =
+    typeof CONTACT_INFO.workingHours === "object"
+      ? CONTACT_INFO.workingHours[lang] || CONTACT_INFO.workingHours.ar
+      : CONTACT_INFO.workingHours;
+
   const whatsappUrl =
     CONTACT_INFO.whatsappUrl ||
-    `https://wa.me/${CONTACT_INFO.phone?.replace(/[^0-9]/g, "")}`;
+    `https://wa.me/${(CONTACT_INFO.whatsappNumber || CONTACT_INFO.phone)?.replace(/[^0-9]/g, "")}`;
 
   const appleMapsUrl =
     CONTACT_INFO.appleMapsUrl ||
-    `https://maps.apple.com/?q=${encodeURIComponent(CONTACT_INFO.address || "Dubai")}`;
+    `https://maps.apple.com/?q=${encodeURIComponent(currentAddress || "Dubai")}`;
 
   return (
     <section className="relative w-full border-t border-fitness-border py-16 md:py-24 overflow-hidden">
@@ -162,13 +225,13 @@ export default function ContactSection() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-12 text-center">
           <span className="inline-block rounded-full border border-fitness-primary/30 bg-fitness-primary/10 px-4 py-1 text-xs font-bold text-fitness-primary mb-3">
-            قنوات التواصل المباشر
+            {ui.badge}
           </span>
           <h2 className="text-2xl font-black tracking-tight text-white md:text-4xl">
-            معلومات التواصل ومقر التدريب
+            {ui.title}
           </h2>
           <p className="mt-2 text-xs text-fitness-muted md:text-sm">
-            للاستشارات الخاصة، فحص البنية العضلية وحجز جلسات التدريب الشخصي
+            {ui.subtitle}
           </p>
         </div>
 
@@ -180,10 +243,10 @@ export default function ContactSection() {
                 <PhoneIcon />
               </div>
               <h3 className="mt-5 text-lg font-black text-white">
-                الاتصال والاستشارة الهاتفية
+                {ui.card1.title}
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-fitness-muted">
-                للإجابة على الأسئلة قبل الاشتراك وحجز مواعيد التدريب الخاص:
+                {ui.card1.desc}
               </p>
 
               <div className="mt-5">
@@ -200,25 +263,25 @@ export default function ContactSection() {
 
             <div className="mt-6 border-t border-fitness-border/60 pt-4">
               <span className="text-[11px] font-medium text-fitness-muted">
-                ساعات الاستجابة ومواعيد التدريب:
+                {ui.card1.hoursLabel}
               </span>
               <p className="mt-1 text-xs font-bold text-zinc-200">
-                {CONTACT_INFO.workingHours}
+                {currentWorkingHours}
               </p>
             </div>
           </Contact3DCard>
 
-          {/* کارت ۲: شبکه‌های اجتماعی (واتس‌اپ و اینستاگرام) */}
+          {/* کارت ۲: شبکه‌های اجتماعی */}
           <Contact3DCard>
             <div>
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-fitness-primary/30 bg-fitness-primary/10 text-fitness-primary shadow-[0_0_15px_rgba(34,197,94,0.2)]">
                 <ChatIcon />
               </div>
               <h3 className="mt-5 text-lg font-black text-white">
-                المحادثة وقنوات التواصل
+                {ui.card2.title}
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-fitness-muted">
-                متابعة اليوميات الرياضية، شروحات التكنيك والتواصل الفوري:
+                {ui.card2.desc}
               </p>
 
               <div className="mt-5 space-y-2.5">
@@ -234,11 +297,11 @@ export default function ContactSection() {
                       <WhatsAppIcon />
                     </div>
                     <span className="text-xs font-bold text-zinc-200 group-hover/item:text-white">
-                      محادثة واتساب المباشرة
+                      {ui.card2.whatsappTitle}
                     </span>
                   </div>
                   <span className="font-mono text-[11px] text-fitness-muted group-hover/item:text-fitness-primary">
-                    WhatsApp Chat
+                    WhatsApp
                   </span>
                 </a>
 
@@ -254,7 +317,7 @@ export default function ContactSection() {
                       <InstagramIcon />
                     </div>
                     <span className="text-xs font-bold text-zinc-200 group-hover/item:text-white">
-                      حساب إنستغرام الرسمي
+                      {ui.card2.instagramTitle}
                     </span>
                   </div>
                   <span className="font-mono text-[11px] text-fitness-muted group-hover/item:text-fitness-primary">
@@ -265,11 +328,11 @@ export default function ContactSection() {
             </div>
 
             <div className="mt-6 border-t border-fitness-border/60 pt-3 text-[11px] text-fitness-muted">
-              استجابة فورية عبر واتساب وإنستغرام خلال ساعات العمل
+              {ui.card2.note}
             </div>
           </Contact3DCard>
 
-          {/* کارت ۳: موقعیت مکانی و ناوبری */}
+          {/* کارت ۳: موقعیت مکانی */}
           <Contact3DCard>
             <div>
               <div className="flex items-center justify-between">
@@ -278,15 +341,15 @@ export default function ContactSection() {
                 </div>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  الموقع متاح ومفعّل
+                  {ui.card3.status}
                 </span>
               </div>
 
               <h3 className="mt-5 text-lg font-black text-white">
-                مقر التدريب والصالة الرياضية
+                {ui.card3.title}
               </h3>
               <p className="mt-1.5 text-xs leading-relaxed text-fitness-muted">
-                {CONTACT_INFO.address}
+                {currentAddress}
               </p>
             </div>
 
@@ -298,7 +361,7 @@ export default function ContactSection() {
                   rel="noopener noreferrer"
                   className="flex-1 rounded-xl border border-fitness-border bg-zinc-950/70 py-3 text-center text-xs font-black text-zinc-200 transition-all hover:border-fitness-primary hover:bg-fitness-primary hover:text-black shadow-sm"
                 >
-                  Google Maps
+                  {ui.card3.googleMaps}
                 </a>
                 <a
                   href={appleMapsUrl}
@@ -306,7 +369,7 @@ export default function ContactSection() {
                   rel="noopener noreferrer"
                   className="flex-1 rounded-xl border border-fitness-border bg-zinc-950/70 py-3 text-center text-xs font-black text-zinc-200 transition-all hover:border-fitness-primary hover:bg-fitness-primary hover:text-black shadow-sm"
                 >
-                  Apple Maps
+                  {ui.card3.appleMaps}
                 </a>
               </div>
             </div>
