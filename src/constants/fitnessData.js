@@ -1,16 +1,3 @@
-export const HERO_STATS = {
-  ar: [
-    { value: "+500", label: "مشترك حققوا أهدافهم" },
-    { value: "98%", label: "نسبة رضا المشتركين" },
-    { value: "+8 سنوات", label: "خبرة تدريبية معتمدة" },
-  ],
-  en: [
-    { value: "+500", label: "Clients Transformed" },
-    { value: "98%", label: "Client Satisfaction" },
-    { value: "+8 Yrs", label: "Certified Experience" },
-  ],
-};
-
 export const HERO_CONTENT = {
   ar: {
     badge: "HYPERTROPHY & FAT LOSS PROTOCOL",
@@ -100,8 +87,8 @@ export const TRANSFORMATIONS = {
       name: "عمر س.",
       period: "16 أسبوعاً",
       achievement: "زيادة 6 كجم عضل صافي بدون دهون",
-      beforeImg: "/images/before-2.jpg",
-      afterImg: "/images/after-2.jpg",
+      beforeImg: "/images/before-men.jpg",
+      afterImg: "/images/after-men.jpg",
     },
   ],
   en: [
@@ -118,8 +105,8 @@ export const TRANSFORMATIONS = {
       name: "Omar S.",
       period: "16 Weeks",
       achievement: "Gained 6 kg of pure lean muscle mass with zero fat gain",
-      beforeImg: "/images/before-2.jpg",
-      afterImg: "/images/after-2.jpg",
+      beforeImg: "/images/before-men.jpg",
+      afterImg: "/images/after-men.jpg",
     },
   ],
 };

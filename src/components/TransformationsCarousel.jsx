@@ -60,7 +60,7 @@ export default function TransformationsCarousel({ lang = "ar" }) {
             >
               <span className="text-lg font-bold rtl:rotate-180">
                 <svg
-                  className="h-5 w-5 transition-transform rtl:rotate-180"
+                  className="h-5 w-5 transition-transform"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -109,7 +109,7 @@ export default function TransformationsCarousel({ lang = "ar" }) {
             >
               <span className="text-lg font-bold rtl:rotate-180">
                 <svg
-                  className="h-5 w-5 transition-transform rtl:rotate-180"
+                  className="h-5 w-5 transition-transform "
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
